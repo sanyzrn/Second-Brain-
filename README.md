@@ -31,11 +31,20 @@ in **Space Mono** (the "instrument" voice). RTL is the host layout, not a mirror
 - **Offline-first**, no Firebase / no third-party cloud.
 - Custom design system on Compose Foundation; Material used only as a substrate.
 
-## Build status — Phase 0 (Foundations)
+## Build status — Phase 3 (Resurface) + polish
 
-Project setup, Hilt graph, Room+SQLCipher with a Keystore-backed key, the
-design-system module, and an RTL shell rendering the chosen type and the
-Timeline-spine signature in miniature.
+Capture → triage → projects, **FTS5 Persian search** (normalized index+query,
+bm25 ranking, kept in sync by triggers), the **Timeline** showpiece (Jalali day
+markers, pine spine), a swipeable home shell, splash screen, onboarding,
+theme settings (system/light/dark), About, and double-tap-back to exit.
+
+> **Replace the DBS logo:** `feature/settings/src/main/res/drawable/dbs_logo.xml`
+> is a placeholder (the real `Dbs_logo_single.webp` couldn't be fetched in the
+> sandbox). Drop the real file in as `dbs_logo.webp` at that path and delete the
+> `.xml` placeholder.
+
+> **FTS5:** search relies on SQLCipher being built with FTS5 (the modern
+> `net.zetetic:sqlcipher-android` builds enable it).
 
 > **Note on building in the Claude Code web environment:** this session's egress
 > policy blocks `dl.google.com`, which hosts the Android SDK *and* the Google

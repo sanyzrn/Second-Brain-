@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pine Editorial (dark / warm ink) splash background. -->
+    <color name="sb_splash">#131212</color>
+</resources>

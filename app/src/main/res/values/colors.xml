@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Pine Editorial — warm paper base + deep pine accent.
-         Mirrors the design-system tokens in :core:designsystem (Color.kt). -->
-    <color name="sb_paper">#F3EEE6</color>
-    <color name="sb_ink">#1C1815</color>
+    <!-- Pine Editorial (light). Mirrors :core:designsystem tokens.
+         Night overrides live in values-night/colors.xml. -->
+    <color name="sb_splash">#F3EEE5</color>
+    <color name="sb_ink">#221C17</color>
     <color name="sb_pine">#1F6F5C</color>
 </resources>

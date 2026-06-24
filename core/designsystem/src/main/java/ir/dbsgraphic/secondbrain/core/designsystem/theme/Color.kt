@@ -3,34 +3,31 @@ package ir.dbsgraphic.secondbrain.core.designsystem.theme
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
-// ─── Pine Editorial palette ──────────────────────────────────────────────
-// Light is primary (warm paper). Dark is available for low-light capture.
-// The accent is Deep Pine — it reads as ink, never as a neon signal, and is
-// spent in exactly one place: the Timeline spine and the single primary action.
+// ─── Pine Editorial palette (art-directed) ───────────────────────────────
+// Light is warm paper with Deep Pine as the accent. Dark is warm ink where the
+// signature warms to DBS Ember, with pine kept as a quiet secondary.
 
 // Light — warm paper
-internal val Paper = Color(0xFFF3EEE6)
-internal val PaperRaised = Color(0xFFFBF8F2)
-internal val InkLight = Color(0xFF1C1815)
-internal val MutedLight = Color(0xFF7A7066)
-internal val HairlineLight = Color(0xFFE4DCCF)
+internal val PaperBg = Color(0xFFF3EEE5)
+internal val PaperSurface = Color(0xFFF8F3EA)
+internal val PaperText = Color(0xFF221C17)
+internal val PaperMuted = Color(0xFF776D60)
+internal val PaperHairline = Color(0xFFD9CFC0)
 
-// Dark — warm ink (never pure black)
-internal val Ink = Color(0xFF16120E)
-internal val SurfaceDark = Color(0xFF211B15)
-internal val TextDark = Color(0xFFEDE6DB)
-internal val MutedDark = Color(0xFF8C8276)
-internal val HairlineDark = Color(0xFF2E2820)
+// Dark — warm ink
+internal val InkBg = Color(0xFF131212)
+internal val InkSurface = Color(0xFF1F1D1C)
+internal val InkText = Color(0xFFEBE6E1)
+internal val InkMuted = Color(0xFF9A9187)
+internal val InkHairline = Color(0xFF2A2624)
 
-// Signature accent — Deep Pine
+// Accents
 internal val Pine = Color(0xFF1F6F5C)
-internal val PineDim = Color(0xFF184F43)
-internal val OnPine = Color(0xFFF3EEE6)
+internal val Ember = Color(0xFFD98E3C)
 
 /**
- * The semantic color set the UI reads from. Components never reference raw
- * hex values — only these roles — so a second palette can be swapped in
- * without touching feature code (Constitution §16).
+ * Semantic color roles the UI reads from. Components reference these, never raw
+ * hex — so a palette swap never touches feature code (Constitution §16).
  */
 @Immutable
 data class SbColors(
@@ -40,31 +37,31 @@ data class SbColors(
     val muted: Color,
     val hairline: Color,
     val accent: Color,
-    val accentDim: Color,
+    val accentSecondary: Color,
     val onAccent: Color,
     val isDark: Boolean,
 )
 
 val PineEditorialLight = SbColors(
-    background = Paper,
-    surface = PaperRaised,
-    text = InkLight,
-    muted = MutedLight,
-    hairline = HairlineLight,
+    background = PaperBg,
+    surface = PaperSurface,
+    text = PaperText,
+    muted = PaperMuted,
+    hairline = PaperHairline,
     accent = Pine,
-    accentDim = PineDim,
-    onAccent = OnPine,
+    accentSecondary = Pine,
+    onAccent = PaperSurface,
     isDark = false,
 )
 
 val PineEditorialDark = SbColors(
-    background = Ink,
-    surface = SurfaceDark,
-    text = TextDark,
-    muted = MutedDark,
-    hairline = HairlineDark,
-    accent = Pine,
-    accentDim = PineDim,
-    onAccent = OnPine,
+    background = InkBg,
+    surface = InkSurface,
+    text = InkText,
+    muted = InkMuted,
+    hairline = InkHairline,
+    accent = Ember,
+    accentSecondary = Pine,
+    onAccent = InkBg,
     isDark = true,
 )

@@ -1,15 +1,19 @@
 package ir.dbsgraphic.secondbrain.core.data
 
+import ir.dbsgraphic.secondbrain.core.database.PersianNormalizer
 import ir.dbsgraphic.secondbrain.core.database.dao.ItemDao
 import ir.dbsgraphic.secondbrain.core.database.dao.ItemLinkDao
+import ir.dbsgraphic.secondbrain.core.database.dao.SearchDao
 import ir.dbsgraphic.secondbrain.core.database.entity.Item
 import ir.dbsgraphic.secondbrain.core.database.entity.ItemLink
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import javax.inject.Inject
 
 class ItemRepositoryImpl @Inject constructor(
     private val itemDao: ItemDao,
     private val itemLinkDao: ItemLinkDao,
+    private val searchDao: SearchDao,
     private val clock: Clock,
     private val idGenerator: IdGenerator,
 ) : ItemRepository {
@@ -19,6 +23,13 @@ class ItemRepositoryImpl @Inject constructor(
     override fun observeInboxCount(): Flow<Int> = itemDao.observeInboxCount()
 
     override fun observeById(id: String): Flow<Item?> = itemDao.observeById(id)
+
+    override fun observeTimeline(): Flow<List<Item>> = itemDao.observeTimeline()
+
+    override fun search(rawQuery: String): Flow<List<Item>> {
+        val match = buildMatchQuery(rawQuery) ?: return flowOf(emptyList())
+        return searchDao.search(match)
+    }
 
     override fun observeByProject(projectId: String): Flow<List<Item>> =
         itemDao.observeByProject(projectId)
@@ -73,5 +84,24 @@ class ItemRepositoryImpl @Inject constructor(
 
     override suspend fun unlink(fromId: String, toId: String, kind: String) {
         itemLinkDao.delete(fromId, toId, kind)
+    }
+
+    /**
+     * Turn raw user text into an FTS5 MATCH string. Normalized the same way the
+     * index is, split into tokens, each made a quoted prefix term so results
+     * appear as you type. Returns null when there's nothing to search.
+     */
+    private fun buildMatchQuery(raw: String): String? {
+        val normalized = PersianNormalizer.normalize(raw).trim()
+        if (normalized.isEmpty()) return null
+        val tokens = normalized.split(Regex("\\s+"))
+            .map { it.filterNot { c -> c in FTS_RESERVED } }
+            .filter { it.isNotBlank() }
+        if (tokens.isEmpty()) return null
+        return tokens.joinToString(" ") { "\"$it\"*" }
+    }
+
+    private companion object {
+        val FTS_RESERVED = setOf('"', '*', '(', ')', ':', '^', '-')
     }
 }

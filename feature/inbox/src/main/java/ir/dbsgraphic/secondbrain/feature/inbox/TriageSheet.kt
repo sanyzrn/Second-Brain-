@@ -182,7 +182,7 @@ fun TriageSheet(
                 ) {
                     tags.forEach { tag ->
                         SbChip(
-                            label = "# $tag  ✕",
+                            label = "# $tag  ×",
                             selected = true,
                             onClick = { tags = tags - tag },
                         )

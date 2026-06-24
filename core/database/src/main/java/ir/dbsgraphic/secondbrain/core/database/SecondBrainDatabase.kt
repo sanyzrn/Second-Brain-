@@ -5,6 +5,7 @@ import androidx.room.RoomDatabase
 import ir.dbsgraphic.secondbrain.core.database.dao.ItemDao
 import ir.dbsgraphic.secondbrain.core.database.dao.ItemLinkDao
 import ir.dbsgraphic.secondbrain.core.database.dao.ProjectDao
+import ir.dbsgraphic.secondbrain.core.database.dao.SearchDao
 import ir.dbsgraphic.secondbrain.core.database.entity.Item
 import ir.dbsgraphic.secondbrain.core.database.entity.ItemLink
 import ir.dbsgraphic.secondbrain.core.database.entity.Project
@@ -19,13 +20,14 @@ import ir.dbsgraphic.secondbrain.core.database.entity.Project
  */
 @Database(
     entities = [Item::class, Project::class, ItemLink::class],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 abstract class SecondBrainDatabase : RoomDatabase() {
     abstract fun itemDao(): ItemDao
     abstract fun projectDao(): ProjectDao
     abstract fun itemLinkDao(): ItemLinkDao
+    abstract fun searchDao(): SearchDao
 
     companion object {
         const val NAME = "second_brain.db"

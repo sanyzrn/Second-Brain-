@@ -6,43 +6,78 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import ir.dbsgraphic.secondbrain.feature.inbox.InboxRoute
+import ir.dbsgraphic.secondbrain.feature.onboarding.OnboardingRoute
 import ir.dbsgraphic.secondbrain.feature.project.ProjectRoute
-import ir.dbsgraphic.secondbrain.feature.project.ProjectsRoute
+import ir.dbsgraphic.secondbrain.feature.search.SearchRoute
+import ir.dbsgraphic.secondbrain.feature.settings.AboutRoute
+import ir.dbsgraphic.secondbrain.feature.settings.SettingsRoute
 
-private object Routes {
-    const val INBOX = "inbox"
+object Routes {
+    const val ONBOARDING = "onboarding"
+    const val MAIN = "main"
     const val PROJECTS = "projects"
     const val PROJECT = "project/{projectId}"
+    const val SEARCH = "search"
+    const val SETTINGS = "settings"
+    const val ABOUT = "about"
     fun project(id: String) = "project/$id"
 }
 
 /**
- * App navigation. The Inbox is the start — everything begins there (§3).
- * Triage is an in-place sheet (no route); Projects and a Project hub are the
- * two destinations this phase adds.
+ * App navigation. Onboarding (first run) → the main swipeable shell. Project
+ * detail, search, settings and about are pushed on top with horizontal slides
+ * — a quiet, professional spatial model (design spine: motion is purposeful).
  */
 @Composable
-fun SecondBrainNavHost() {
+fun SecondBrainNavHost(
+    startDestination: String,
+    onOnboardingComplete: () -> Unit,
+) {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = Routes.INBOX) {
-        composable(Routes.INBOX) {
-            InboxRoute(
-                onOpenProjects = { navController.navigate(Routes.PROJECTS) },
+    NavHost(
+        navController = navController,
+        startDestination = startDestination,
+    ) {
+        composable(Routes.ONBOARDING) {
+            OnboardingRoute(
+                onComplete = {
+                    onOnboardingComplete()
+                    navController.navigate(Routes.MAIN) {
+                        popUpTo(Routes.ONBOARDING) { inclusive = true }
+                    }
+                },
             )
         }
-        composable(Routes.PROJECTS) {
-            ProjectsRoute(
+
+        composable(Routes.MAIN) {
+            MainShell(
                 onOpenProject = { id -> navController.navigate(Routes.project(id)) },
-                onBack = { navController.popBackStack() },
+                onOpenSearch = { navController.navigate(Routes.SEARCH) },
+                onOpenSettings = { navController.navigate(Routes.SETTINGS) },
             )
         }
+
         composable(
             route = Routes.PROJECT,
             arguments = listOf(navArgument("projectId") { type = NavType.StringType }),
         ) {
             ProjectRoute(onBack = { navController.popBackStack() })
+        }
+
+        composable(Routes.SEARCH) {
+            SearchRoute(onBack = { navController.popBackStack() })
+        }
+
+        composable(Routes.SETTINGS) {
+            SettingsRoute(
+                onBack = { navController.popBackStack() },
+                onOpenAbout = { navController.navigate(Routes.ABOUT) },
+            )
+        }
+
+        composable(Routes.ABOUT) {
+            AboutRoute(onBack = { navController.popBackStack() })
         }
     }
 }
