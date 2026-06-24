@@ -21,4 +21,33 @@ interface ItemRepository {
      * than forgetting (Constitution §2, §3). Returns the new item's id.
      */
     suspend fun capture(content: String): String
+
+    fun observeById(id: String): Flow<Item?>
+
+    /** A project's contents, derived by filtering Items (§4). */
+    fun observeByProject(projectId: String): Flow<List<Item>>
+
+    /**
+     * Triage a formless inbox item: give it a type (and optionally a project and
+     * tags), and move it out of the Inbox. Organizing happens here, never at
+     * capture time (§3, §20).
+     */
+    suspend fun triage(
+        itemId: String,
+        type: String,
+        projectId: String? = null,
+        tags: List<String> = emptyList(),
+    )
+
+    // ── Connections (§5) ────────────────────────────────────────────────────
+
+    /** Items that point at [itemId] — backlinks. */
+    fun observeBacklinks(itemId: String): Flow<List<Item>>
+
+    /** Items that [itemId] points at. */
+    fun observeOutgoing(itemId: String): Flow<List<Item>>
+
+    suspend fun link(fromId: String, toId: String, kind: String = "related")
+
+    suspend fun unlink(fromId: String, toId: String, kind: String = "related")
 }

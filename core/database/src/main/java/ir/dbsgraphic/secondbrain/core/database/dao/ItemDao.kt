@@ -32,6 +32,13 @@ interface ItemDao {
     @Query("SELECT * FROM items WHERE id = :id")
     fun observeById(id: String): Flow<Item?>
 
+    @Query("SELECT * FROM items WHERE id = :id")
+    suspend fun getById(id: String): Item?
+
+    /** A Project's contents, derived by filtering Items — no duplication (§4). */
+    @Query("SELECT * FROM items WHERE projectId = :projectId AND status != 'trashed' ORDER BY createdAt DESC")
+    fun observeByProject(projectId: String): Flow<List<Item>>
+
     @Query("SELECT COUNT(*) FROM items WHERE status = 'inbox'")
     fun observeInboxCount(): Flow<Int>
 }

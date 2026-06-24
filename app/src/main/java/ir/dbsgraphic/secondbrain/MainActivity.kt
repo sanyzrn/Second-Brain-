@@ -10,7 +10,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.runtime.CompositionLocalProvider
 import dagger.hilt.android.AndroidEntryPoint
 import ir.dbsgraphic.secondbrain.core.designsystem.theme.SecondBrainTheme
-import ir.dbsgraphic.secondbrain.feature.inbox.InboxRoute
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -32,5 +31,5 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun AppRoot() {
     // The Inbox is the home — everything starts here (Constitution §3).
-    InboxRoute()
+    SecondBrainNavHost()
 }

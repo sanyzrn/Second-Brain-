@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "ir.dbsgraphic.secondbrain.feature.inbox"
+    namespace = "ir.dbsgraphic.secondbrain.feature.project"
     compileSdk = 35
 
     defaultConfig {
@@ -36,7 +36,6 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.foundation)
-    implementation(libs.androidx.material3) // ModalBottomSheet behavior only, fully re-themed
     implementation(libs.androidx.ui.tooling.preview)
     debugImplementation(libs.androidx.ui.tooling)
 

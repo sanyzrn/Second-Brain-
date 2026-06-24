@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.dbsgraphic.secondbrain.core.data.ItemRepository
+import ir.dbsgraphic.secondbrain.core.data.ProjectRepository
+import ir.dbsgraphic.secondbrain.core.database.entity.Item
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,16 +22,19 @@ import javax.inject.Inject
 /** One-off feedback the screen consumes (toasts/haptics); never replayed. */
 sealed interface InboxEvent {
     data object Captured : InboxEvent
-    data class CaptureFailed(val message: String) : InboxEvent
+    data object Triaged : InboxEvent
+    data class Failed(val message: String) : InboxEvent
 }
 
 @HiltViewModel
 class InboxViewModel @Inject constructor(
     private val repository: ItemRepository,
+    private val projectRepository: ProjectRepository,
 ) : ViewModel() {
 
     private val draft = MutableStateFlow("")
     private val isSaving = MutableStateFlow(false)
+    private val triageTarget = MutableStateFlow<Item?>(null)
 
     private val content: Flow<InboxContent> = repository.observeInbox()
         .map { items ->
@@ -38,8 +43,20 @@ class InboxViewModel @Inject constructor(
         .catch { emit(InboxContent.Error("خواندن صندوق ممکن نشد")) }
 
     val uiState: StateFlow<InboxUiState> =
-        combine(content, draft, isSaving) { c, d, s ->
-            InboxUiState(content = c, draft = d, isSaving = s)
+        combine(
+            content,
+            draft,
+            isSaving,
+            projectRepository.observeProjects(),
+            triageTarget,
+        ) { c, d, s, projects, target ->
+            InboxUiState(
+                content = c,
+                draft = d,
+                isSaving = s,
+                projects = projects,
+                triageTarget = target,
+            )
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -65,10 +82,40 @@ class InboxViewModel @Inject constructor(
                 draft.value = ""
                 _events.send(InboxEvent.Captured)
             } catch (e: Exception) {
-                _events.send(InboxEvent.CaptureFailed("ثبت نشد، دوباره تلاش کن"))
+                _events.send(InboxEvent.Failed("ثبت نشد، دوباره تلاش کن"))
             } finally {
                 isSaving.value = false
             }
+        }
+    }
+
+    fun openTriage(item: Item) {
+        triageTarget.value = item
+    }
+
+    fun dismissTriage() {
+        triageTarget.value = null
+    }
+
+    /** Triage the open item, then let it move out of the Inbox (§3). */
+    fun confirmTriage(type: ItemType, projectId: String?, tags: List<String>) {
+        val target = triageTarget.value ?: return
+        viewModelScope.launch {
+            try {
+                repository.triage(target.id, type.value, projectId, tags)
+                triageTarget.value = null
+                _events.send(InboxEvent.Triaged)
+            } catch (e: Exception) {
+                _events.send(InboxEvent.Failed("مرتب‌سازی ممکن نشد"))
+            }
+        }
+    }
+
+    fun createProject(name: String) {
+        val trimmed = name.trim()
+        if (trimmed.isEmpty()) return
+        viewModelScope.launch {
+            runCatching { projectRepository.createProject(trimmed) }
         }
     }
 }

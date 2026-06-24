@@ -9,6 +9,8 @@ import ir.dbsgraphic.secondbrain.core.data.Clock
 import ir.dbsgraphic.secondbrain.core.data.IdGenerator
 import ir.dbsgraphic.secondbrain.core.data.ItemRepository
 import ir.dbsgraphic.secondbrain.core.data.ItemRepositoryImpl
+import ir.dbsgraphic.secondbrain.core.data.ProjectRepository
+import ir.dbsgraphic.secondbrain.core.data.ProjectRepositoryImpl
 import ir.dbsgraphic.secondbrain.core.data.SystemClock
 import ir.dbsgraphic.secondbrain.core.data.UuidGenerator
 import javax.inject.Singleton
@@ -20,6 +22,10 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindItemRepository(impl: ItemRepositoryImpl): ItemRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindProjectRepository(impl: ProjectRepositoryImpl): ProjectRepository
 
     companion object {
         @Provides
