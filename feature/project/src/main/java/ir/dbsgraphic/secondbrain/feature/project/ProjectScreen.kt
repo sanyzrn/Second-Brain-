@@ -1,6 +1,9 @@
 package ir.dbsgraphic.secondbrain.feature.project
 
+import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ir.dbsgraphic.secondbrain.core.database.entity.Item
@@ -37,13 +41,23 @@ fun ProjectRoute(
     viewModel: ProjectViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    ProjectScreen(state = state, onSelectTab = viewModel::selectTab, onBack = onBack)
+    val context = LocalContext.current
+    ProjectScreen(
+        state = state,
+        onSelectTab = viewModel::selectTab,
+        onTrash = { id ->
+            viewModel.trash(id)
+            Toast.makeText(context, "به سطل منتقل شد", Toast.LENGTH_SHORT).show()
+        },
+        onBack = onBack,
+    )
 }
 
 @Composable
 fun ProjectScreen(
     state: ProjectUiState,
     onSelectTab: (ProjectTab) -> Unit,
+    onTrash: (String) -> Unit,
     onBack: () -> Unit,
 ) {
     val colors = SecondBrainTheme.colors
@@ -101,7 +115,7 @@ fun ProjectScreen(
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(items = visible, key = { it.id }) { item ->
-                    ProjectItemRow(item)
+                    ProjectItemRow(item, onLongPress = { onTrash(item.id) })
                     SbHairline()
                 }
             }
@@ -109,12 +123,18 @@ fun ProjectScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ProjectItemRow(item: Item) {
+private fun ProjectItemRow(item: Item, onLongPress: () -> Unit) {
     val colors = SecondBrainTheme.colors
     val type = SecondBrainTheme.type
     val space = SecondBrainTheme.spacing
-    Column(modifier = Modifier.fillMaxWidth().padding(vertical = space.lg)) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(onClick = {}, onLongClick = onLongPress)
+            .padding(vertical = space.lg),
+    ) {
         SbText(text = item.content, style = type.bodyLarge)
         Spacer(Modifier.height(space.sm))
         Row(verticalAlignment = Alignment.CenterVertically) {

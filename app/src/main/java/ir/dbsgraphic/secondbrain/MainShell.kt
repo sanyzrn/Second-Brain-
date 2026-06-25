@@ -34,6 +34,7 @@ import ir.dbsgraphic.secondbrain.core.designsystem.component.SbChip
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbIconButton
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbText
 import ir.dbsgraphic.secondbrain.core.designsystem.theme.SecondBrainTheme
+import ir.dbsgraphic.secondbrain.core.designsystem.util.rememberReducedMotion
 import ir.dbsgraphic.secondbrain.feature.inbox.InboxRoute
 import ir.dbsgraphic.secondbrain.feature.project.ProjectsRoute
 import ir.dbsgraphic.secondbrain.feature.timeline.TimelineRoute
@@ -59,6 +60,7 @@ fun MainShell(
     val pagerState = rememberPagerState(initialPage = 1, pageCount = { sections.size })
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val reducedMotion = rememberReducedMotion()
 
     // Two-step exit: a first back warns, a second within 2s leaves (§13 spirit —
     // protect against accidental exit).
@@ -112,7 +114,12 @@ fun MainShell(
                 SbChip(
                     label = label,
                     selected = pagerState.currentPage == index,
-                    onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
+                    onClick = {
+                        scope.launch {
+                            if (reducedMotion) pagerState.scrollToPage(index)
+                            else pagerState.animateScrollToPage(index)
+                        }
+                    },
                 )
             }
         }

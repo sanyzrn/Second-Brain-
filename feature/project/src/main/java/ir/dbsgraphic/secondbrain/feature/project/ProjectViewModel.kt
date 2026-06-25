@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /** A hub tab. ALL shows everything; the rest filter Items by type — derived,
@@ -40,7 +41,7 @@ data class ProjectUiState(
 class ProjectViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     projectRepository: ProjectRepository,
-    itemRepository: ItemRepository,
+    private val itemRepository: ItemRepository,
 ) : ViewModel() {
 
     private val projectId: String = checkNotNull(savedStateHandle["projectId"])
@@ -57,4 +58,6 @@ class ProjectViewModel @Inject constructor(
     fun selectTab(newTab: ProjectTab) {
         tab.value = newTab
     }
+
+    fun trash(id: String) = viewModelScope.launch { itemRepository.trash(id) }
 }

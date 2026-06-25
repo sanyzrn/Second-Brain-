@@ -1,6 +1,9 @@
 package ir.dbsgraphic.secondbrain.feature.timeline
 
+import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -36,11 +40,19 @@ import ir.dbsgraphic.secondbrain.core.database.entity.Item
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbText
 import ir.dbsgraphic.secondbrain.core.designsystem.theme.SecondBrainTheme
 import ir.dbsgraphic.secondbrain.core.designsystem.util.JalaliDate
+import ir.dbsgraphic.secondbrain.core.designsystem.util.rememberReducedMotion
 
 @Composable
 fun TimelineRoute(viewModel: TimelineViewModel = hiltViewModel()) {
     val items by viewModel.items.collectAsStateWithLifecycle()
-    TimelineScreen(items)
+    val context = LocalContext.current
+    TimelineScreen(
+        items = items,
+        onTrash = { id ->
+            viewModel.trash(id)
+            Toast.makeText(context, "به سطل منتقل شد", Toast.LENGTH_SHORT).show()
+        },
+    )
 }
 
 private sealed interface TlRow {
@@ -66,10 +78,11 @@ private fun buildRows(items: List<Item>): List<TlRow> {
 }
 
 @Composable
-fun TimelineScreen(items: List<Item>) {
+fun TimelineScreen(items: List<Item>, onTrash: (String) -> Unit = {}) {
     val colors = SecondBrainTheme.colors
     val type = SecondBrainTheme.type
     val space = SecondBrainTheme.spacing
+    val reducedMotion = rememberReducedMotion()
 
     if (items.isEmpty()) {
         Column(
@@ -99,32 +112,44 @@ fun TimelineScreen(items: List<Item>) {
         contentPadding = PaddingValues(horizontal = space.xl, vertical = space.md),
     ) {
         items(items = rows, key = { it.key }) { row ->
+            val rowModifier = if (reducedMotion) Modifier else Modifier.animateItem()
             when (row) {
-                is TlRow.DayHeader -> DayHeaderRow(row.label)
-                is TlRow.Entry -> EntryRow(row.item)
+                is TlRow.DayHeader -> DayHeaderRow(row.label, rowModifier)
+                is TlRow.Entry -> EntryRow(row.item, rowModifier, onLongPress = { onTrash(row.item.id) })
             }
         }
     }
 }
 
 @Composable
-private fun DayHeaderRow(label: String) {
+private fun DayHeaderRow(label: String, modifier: Modifier = Modifier) {
     val colors = SecondBrainTheme.colors
     val space = SecondBrainTheme.spacing
-    Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
-        Spine(big = true)
+    val isToday = label == "امروز"
+    Row(modifier = modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+        Spine(big = true, emphasized = isToday)
         Column(modifier = Modifier.padding(start = space.md, top = space.lg, bottom = space.sm)) {
-            SbText(text = label, style = SecondBrainTheme.type.caption, color = colors.accent)
+            SbText(
+                text = label,
+                style = if (isToday) SecondBrainTheme.type.title else SecondBrainTheme.type.caption,
+                color = colors.accent,
+            )
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun EntryRow(item: Item) {
+private fun EntryRow(item: Item, modifier: Modifier = Modifier, onLongPress: () -> Unit = {}) {
     val colors = SecondBrainTheme.colors
     val type = SecondBrainTheme.type
     val space = SecondBrainTheme.spacing
-    Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min)
+            .combinedClickable(onClick = {}, onLongClick = onLongPress),
+    ) {
         Spine(big = false)
         Column(modifier = Modifier.padding(start = space.md, top = space.sm, bottom = space.lg)) {
             SbText(text = item.content, style = type.bodyLarge)
@@ -144,7 +169,7 @@ private fun EntryRow(item: Item) {
 
 /** The vertical pine spine + a node. The spine runs full-height so days connect. */
 @Composable
-private fun Spine(big: Boolean) {
+private fun Spine(big: Boolean, emphasized: Boolean = false) {
     val colors = SecondBrainTheme.colors
     Box(
         modifier = Modifier.width(28.dp).fillMaxHeight(),
@@ -156,7 +181,11 @@ private fun Spine(big: Boolean) {
                 .fillMaxHeight()
                 .background(colors.accentSecondary),
         )
-        val node = if (big) 13.dp else 8.dp
+        val node = when {
+            emphasized -> 17.dp
+            big -> 13.dp
+            else -> 8.dp
+        }
         Box(
             modifier = Modifier
                 .padding(top = if (big) 16.dp else 8.dp)

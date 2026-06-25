@@ -4,8 +4,10 @@ import android.Manifest
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,6 +54,7 @@ import ir.dbsgraphic.secondbrain.core.designsystem.component.SbText
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbTextField
 import ir.dbsgraphic.secondbrain.core.designsystem.theme.SecondBrainTheme
 import ir.dbsgraphic.secondbrain.core.designsystem.util.relativeTimeFa
+import ir.dbsgraphic.secondbrain.core.designsystem.util.rememberReducedMotion
 
 @Composable
 fun InboxRoute(viewModel: InboxViewModel = hiltViewModel()) {
@@ -103,6 +106,7 @@ fun InboxRoute(viewModel: InboxViewModel = hiltViewModel()) {
         onDraftChange = viewModel::onDraftChange,
         onCapture = viewModel::capture,
         onItemClick = viewModel::openTriage,
+        onItemLongPress = { viewModel.trash(it.id) },
         onDismissTriage = viewModel::dismissTriage,
         onConfirmTriage = viewModel::confirmTriage,
         onCreateProject = viewModel::createProject,
@@ -135,6 +139,7 @@ fun InboxScreen(
     onDraftChange: (String) -> Unit,
     onCapture: () -> Unit,
     onItemClick: (Item) -> Unit,
+    onItemLongPress: (Item) -> Unit,
     onDismissTriage: () -> Unit,
     onConfirmTriage: (ItemType, String?, List<String>) -> Unit,
     onCreateProject: (String) -> Unit,
@@ -164,7 +169,7 @@ fun InboxScreen(
                     color = colors.muted,
                     modifier = Modifier.align(Alignment.Center),
                 )
-                is InboxContent.Items -> InboxList(content.items, onItemClick)
+                is InboxContent.Items -> InboxList(content.items, onItemClick, onItemLongPress)
             }
         }
 
@@ -195,8 +200,13 @@ fun InboxScreen(
 }
 
 @Composable
-private fun InboxList(items: List<Item>, onItemClick: (Item) -> Unit) {
+private fun InboxList(
+    items: List<Item>,
+    onItemClick: (Item) -> Unit,
+    onItemLongPress: (Item) -> Unit,
+) {
     val space = SecondBrainTheme.spacing
+    val reducedMotion = rememberReducedMotion()
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = space.sm, bottom = space.md),
@@ -205,15 +215,22 @@ private fun InboxList(items: List<Item>, onItemClick: (Item) -> Unit) {
             InboxItemRow(
                 item = item,
                 onClick = { onItemClick(item) },
-                modifier = Modifier.animateItem(),
+                onLongClick = { onItemLongPress(item) },
+                modifier = if (reducedMotion) Modifier else Modifier.animateItem(),
             )
             SbHairline()
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun InboxItemRow(item: Item, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun InboxItemRow(
+    item: Item,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val colors = SecondBrainTheme.colors
     val type = SecondBrainTheme.type
     val space = SecondBrainTheme.spacing
@@ -221,7 +238,7 @@ private fun InboxItemRow(item: Item, onClick: () -> Unit, modifier: Modifier = M
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
             .padding(vertical = space.lg),
     ) {
         SbText(text = item.content, style = type.bodyLarge, modifier = Modifier.fillMaxWidth())
@@ -347,7 +364,7 @@ private fun InboxItemsPreview() {
                 draft = "یک فکر تازه",
             ),
             isRecording = false,
-            onDraftChange = {}, onCapture = {}, onItemClick = {},
+            onDraftChange = {}, onCapture = {}, onItemClick = {}, onItemLongPress = {},
             onDismissTriage = {}, onConfirmTriage = { _, _, _ -> }, onCreateProject = {},
             onTrash = {}, onTakePhoto = {}, onRecordToggle = {},
         )

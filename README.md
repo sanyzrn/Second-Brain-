@@ -31,6 +31,12 @@ in **Space Mono** (the "instrument" voice). RTL is the host layout, not a mirror
 - **Offline-first**, no Firebase / no third-party cloud.
 - Custom design system on Compose Foundation; Material used only as a substrate.
 
+## Build status — Phase 7 (signature & polish)
+
+The Timeline signature realized: "today" is emphasized on the spine, rows
+animate in. Long-press any item (Inbox / Timeline / Project) to send it to Trash.
+Motion respects the system "remove animations" setting throughout.
+
 ## Build status — Phase 6 (trust & ownership)
 
 A recoverable **Trash** for every deletion (soft-delete → restore to its prior

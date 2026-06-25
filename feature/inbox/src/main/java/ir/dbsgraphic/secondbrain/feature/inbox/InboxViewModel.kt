@@ -154,6 +154,15 @@ class InboxViewModel @Inject constructor(
         }
     }
 
+    /** Move any item to Trash by id — recoverable (§13). For long-press. */
+    fun trash(id: String) {
+        viewModelScope.launch {
+            runCatching { repository.trash(id) }
+                .onSuccess { _events.send(InboxEvent.Trashed) }
+                .onFailure { _events.send(InboxEvent.Failed("حذف ممکن نشد")) }
+        }
+    }
+
     /** Move the open item to Trash — recoverable (§13). */
     fun trashCurrent() {
         val target = triageTarget.value ?: return
