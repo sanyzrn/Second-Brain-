@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ir.dbsgraphic.secondbrain.core.database.entity.Item
@@ -38,6 +39,7 @@ import ir.dbsgraphic.secondbrain.core.designsystem.util.toPersianDigits
 @Composable
 fun ProjectRoute(
     onBack: () -> Unit,
+    onOpenItem: (String) -> Unit,
     viewModel: ProjectViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -45,6 +47,7 @@ fun ProjectRoute(
     ProjectScreen(
         state = state,
         onSelectTab = viewModel::selectTab,
+        onOpenItem = onOpenItem,
         onTrash = { id ->
             viewModel.trash(id)
             Toast.makeText(context, "به سطل منتقل شد", Toast.LENGTH_SHORT).show()
@@ -57,6 +60,7 @@ fun ProjectRoute(
 fun ProjectScreen(
     state: ProjectUiState,
     onSelectTab: (ProjectTab) -> Unit,
+    onOpenItem: (String) -> Unit,
     onTrash: (String) -> Unit,
     onBack: () -> Unit,
 ) {
@@ -115,7 +119,11 @@ fun ProjectScreen(
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(items = visible, key = { it.id }) { item ->
-                    ProjectItemRow(item, onLongPress = { onTrash(item.id) })
+                    ProjectItemRow(
+                        item = item,
+                        onClick = { onOpenItem(item.id) },
+                        onLongPress = { onTrash(item.id) },
+                    )
                     SbHairline()
                 }
             }
@@ -125,17 +133,17 @@ fun ProjectScreen(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ProjectItemRow(item: Item, onLongPress: () -> Unit) {
+private fun ProjectItemRow(item: Item, onClick: () -> Unit, onLongPress: () -> Unit) {
     val colors = SecondBrainTheme.colors
     val type = SecondBrainTheme.type
     val space = SecondBrainTheme.spacing
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .combinedClickable(onClick = {}, onLongClick = onLongPress)
+            .combinedClickable(onClick = onClick, onLongClick = onLongPress)
             .padding(vertical = space.lg),
     ) {
-        SbText(text = item.content, style = type.bodyLarge)
+        SbText(text = item.content, style = type.bodyLarge, maxLines = 3, overflow = TextOverflow.Ellipsis)
         Spacer(Modifier.height(space.sm))
         Row(verticalAlignment = Alignment.CenterVertically) {
             SbText(text = typeLabelFa(item.type), style = type.monoSmall, color = colors.accent)

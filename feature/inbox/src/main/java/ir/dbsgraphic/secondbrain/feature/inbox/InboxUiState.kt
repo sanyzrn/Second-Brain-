@@ -14,14 +14,6 @@ sealed interface InboxContent {
     data class Error(val message: String) : InboxContent
 }
 
-/** The triage types an item can take. Value is stored; label is the voice. */
-enum class ItemType(val value: String, val label: String) {
-    NOTE("note", "یادداشت"),
-    TASK("task", "کار"),
-    IDEA("idea", "ایده"),
-    DOC("doc", "سند"),
-}
-
 /**
  * Full screen state. The list content is one explicit state; the capture draft
  * lives alongside it so the quick-add bar is always ready (Constitution §2).

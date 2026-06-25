@@ -51,6 +51,7 @@ private val sections = listOf("خط زمان", "صندوق", "پروژه‌ها"
 @Composable
 fun MainShell(
     onOpenProject: (String) -> Unit,
+    onOpenItem: (String) -> Unit,
     onOpenSearch: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
@@ -132,7 +133,7 @@ fun MainShell(
             key = { it },
         ) { page ->
             when (page) {
-                0 -> TimelineRoute()
+                0 -> TimelineRoute(onOpenItem = onOpenItem)
                 1 -> InboxRoute()
                 else -> ProjectsRoute(onOpenProject = onOpenProject)
             }

@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.dbsgraphic.secondbrain.core.ai.AIProvider
 import ir.dbsgraphic.secondbrain.core.ai.TriageSuggestion
 import ir.dbsgraphic.secondbrain.core.data.ItemRepository
+import ir.dbsgraphic.secondbrain.core.data.ItemType
 import ir.dbsgraphic.secondbrain.core.data.ProjectRepository
 import ir.dbsgraphic.secondbrain.core.database.entity.Item
 import kotlinx.coroutines.channels.Channel

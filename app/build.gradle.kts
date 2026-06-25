@@ -58,6 +58,7 @@ dependencies {
     implementation(project(":core:security"))
     implementation(project(":core:ai"))
     implementation(project(":feature:inbox"))
+    implementation(project(":feature:itemdetail"))
     implementation(project(":feature:project"))
     implementation(project(":feature:timeline"))
     implementation(project(":feature:search"))

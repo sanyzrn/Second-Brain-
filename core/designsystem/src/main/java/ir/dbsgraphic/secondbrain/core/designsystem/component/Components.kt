@@ -13,6 +13,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.ui.unit.dp
 import ir.dbsgraphic.secondbrain.core.designsystem.theme.HairlineWidth
@@ -29,11 +30,15 @@ fun SbText(
     style: TextStyle = SecondBrainTheme.type.body,
     color: Color = SecondBrainTheme.colors.text,
     align: TextAlign? = null,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
 ) {
     BasicText(
         text = text,
         modifier = modifier,
         style = style.merge(TextStyle(color = color, textAlign = align ?: TextAlign.Unspecified)),
+        maxLines = maxLines,
+        overflow = overflow,
     )
 }
 

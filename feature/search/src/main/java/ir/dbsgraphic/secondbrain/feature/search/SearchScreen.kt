@@ -2,6 +2,7 @@ package ir.dbsgraphic.secondbrain.feature.search
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -51,6 +53,7 @@ private enum class Mode { SEARCH, ASK }
 @Composable
 fun SearchRoute(
     onBack: () -> Unit,
+    onOpenItem: (String) -> Unit,
     viewModel: SearchViewModel = hiltViewModel(),
 ) {
     val query by viewModel.query.collectAsStateWithLifecycle()
@@ -66,6 +69,7 @@ fun SearchRoute(
         onQueryChange = viewModel::onQueryChange,
         onAskQuestionChange = viewModel::onAskQuestionChange,
         onRunAsk = viewModel::runAsk,
+        onOpenItem = onOpenItem,
         onBack = onBack,
     )
 }
@@ -79,6 +83,7 @@ fun SearchScreen(
     onQueryChange: (String) -> Unit,
     onAskQuestionChange: (String) -> Unit,
     onRunAsk: () -> Unit,
+    onOpenItem: (String) -> Unit,
     onBack: () -> Unit,
 ) {
     val colors = SecondBrainTheme.colors
@@ -111,8 +116,8 @@ fun SearchScreen(
         Spacer(Modifier.height(space.lg))
 
         when (mode) {
-            Mode.SEARCH -> SearchMode(query, results, onQueryChange)
-            Mode.ASK -> AskMode(aiReady, ask, onAskQuestionChange, onRunAsk)
+            Mode.SEARCH -> SearchMode(query, results, onQueryChange, onOpenItem)
+            Mode.ASK -> AskMode(aiReady, ask, onAskQuestionChange, onRunAsk, onOpenItem)
         }
     }
 }
@@ -156,7 +161,12 @@ private fun CommandBar(
 }
 
 @Composable
-private fun ColumnScope.SearchMode(query: String, results: List<Item>, onQueryChange: (String) -> Unit) {
+private fun ColumnScope.SearchMode(
+    query: String,
+    results: List<Item>,
+    onQueryChange: (String) -> Unit,
+    onOpenItem: (String) -> Unit,
+) {
     val colors = SecondBrainTheme.colors
     val type = SecondBrainTheme.type
     val space = SecondBrainTheme.spacing
@@ -176,7 +186,7 @@ private fun ColumnScope.SearchMode(query: String, results: List<Item>, onQueryCh
             Spacer(Modifier.height(space.sm))
             LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f)) {
                 items(items = results, key = { it.id }) { item ->
-                    ResultRow(item)
+                    ResultRow(item, onClick = { onOpenItem(item.id) })
                     SbHairline()
                 }
             }
@@ -190,6 +200,7 @@ private fun ColumnScope.AskMode(
     ask: AskState,
     onQuestionChange: (String) -> Unit,
     onRunAsk: () -> Unit,
+    onOpenItem: (String) -> Unit,
 ) {
     val colors = SecondBrainTheme.colors
     val type = SecondBrainTheme.type
@@ -231,7 +242,7 @@ private fun ColumnScope.AskMode(
             Spacer(Modifier.height(space.sm))
             LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f)) {
                 items(items = ask.sources, key = { it.id }) { item ->
-                    ResultRow(item)
+                    ResultRow(item, onClick = { onOpenItem(item.id) })
                     SbHairline()
                 }
             }
@@ -251,12 +262,17 @@ private fun ColumnScope.Hint(text: String) {
 }
 
 @Composable
-private fun ResultRow(item: Item) {
+private fun ResultRow(item: Item, onClick: () -> Unit) {
     val colors = SecondBrainTheme.colors
     val type = SecondBrainTheme.type
     val space = SecondBrainTheme.spacing
-    Column(modifier = Modifier.fillMaxWidth().padding(vertical = space.lg)) {
-        SbText(text = item.content, style = type.bodyLarge)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = space.lg),
+    ) {
+        SbText(text = item.content, style = type.bodyLarge, maxLines = 2, overflow = TextOverflow.Ellipsis)
         Spacer(Modifier.height(space.xs))
         SbText(text = typeLabelFa(item.type), style = type.monoSmall, color = colors.accentSecondary)
     }

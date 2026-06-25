@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import ir.dbsgraphic.secondbrain.feature.itemdetail.ItemDetailRoute
 import ir.dbsgraphic.secondbrain.feature.onboarding.OnboardingRoute
 import ir.dbsgraphic.secondbrain.feature.project.ProjectRoute
 import ir.dbsgraphic.secondbrain.feature.search.SearchRoute
@@ -26,7 +27,9 @@ object Routes {
     const val AI = "ai_settings"
     const val TRASH = "trash"
     const val DATA = "data"
+    const val ITEM = "item/{itemId}"
     fun project(id: String) = "project/$id"
+    fun item(id: String) = "item/$id"
 }
 
 /**
@@ -59,6 +62,7 @@ fun SecondBrainNavHost(
         composable(Routes.MAIN) {
             MainShell(
                 onOpenProject = { id -> navController.navigate(Routes.project(id)) },
+                onOpenItem = { id -> navController.navigate(Routes.item(id)) },
                 onOpenSearch = { navController.navigate(Routes.SEARCH) },
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
             )
@@ -68,11 +72,24 @@ fun SecondBrainNavHost(
             route = Routes.PROJECT,
             arguments = listOf(navArgument("projectId") { type = NavType.StringType }),
         ) {
-            ProjectRoute(onBack = { navController.popBackStack() })
+            ProjectRoute(
+                onBack = { navController.popBackStack() },
+                onOpenItem = { id -> navController.navigate(Routes.item(id)) },
+            )
+        }
+
+        composable(
+            route = Routes.ITEM,
+            arguments = listOf(navArgument("itemId") { type = NavType.StringType }),
+        ) {
+            ItemDetailRoute(onBack = { navController.popBackStack() })
         }
 
         composable(Routes.SEARCH) {
-            SearchRoute(onBack = { navController.popBackStack() })
+            SearchRoute(
+                onBack = { navController.popBackStack() },
+                onOpenItem = { id -> navController.navigate(Routes.item(id)) },
+            )
         }
 
         composable(Routes.SETTINGS) {

@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -43,11 +44,15 @@ import ir.dbsgraphic.secondbrain.core.designsystem.util.JalaliDate
 import ir.dbsgraphic.secondbrain.core.designsystem.util.rememberReducedMotion
 
 @Composable
-fun TimelineRoute(viewModel: TimelineViewModel = hiltViewModel()) {
+fun TimelineRoute(
+    onOpenItem: (String) -> Unit,
+    viewModel: TimelineViewModel = hiltViewModel(),
+) {
     val items by viewModel.items.collectAsStateWithLifecycle()
     val context = LocalContext.current
     TimelineScreen(
         items = items,
+        onOpenItem = onOpenItem,
         onTrash = { id ->
             viewModel.trash(id)
             Toast.makeText(context, "به سطل منتقل شد", Toast.LENGTH_SHORT).show()
@@ -78,7 +83,11 @@ private fun buildRows(items: List<Item>): List<TlRow> {
 }
 
 @Composable
-fun TimelineScreen(items: List<Item>, onTrash: (String) -> Unit = {}) {
+fun TimelineScreen(
+    items: List<Item>,
+    onOpenItem: (String) -> Unit = {},
+    onTrash: (String) -> Unit = {},
+) {
     val colors = SecondBrainTheme.colors
     val type = SecondBrainTheme.type
     val space = SecondBrainTheme.spacing
@@ -115,7 +124,12 @@ fun TimelineScreen(items: List<Item>, onTrash: (String) -> Unit = {}) {
             val rowModifier = if (reducedMotion) Modifier else Modifier.animateItem()
             when (row) {
                 is TlRow.DayHeader -> DayHeaderRow(row.label, rowModifier)
-                is TlRow.Entry -> EntryRow(row.item, rowModifier, onLongPress = { onTrash(row.item.id) })
+                is TlRow.Entry -> EntryRow(
+                    item = row.item,
+                    modifier = rowModifier,
+                    onClick = { onOpenItem(row.item.id) },
+                    onLongPress = { onTrash(row.item.id) },
+                )
             }
         }
     }
@@ -140,7 +154,12 @@ private fun DayHeaderRow(label: String, modifier: Modifier = Modifier) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun EntryRow(item: Item, modifier: Modifier = Modifier, onLongPress: () -> Unit = {}) {
+private fun EntryRow(
+    item: Item,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
+    onLongPress: () -> Unit = {},
+) {
     val colors = SecondBrainTheme.colors
     val type = SecondBrainTheme.type
     val space = SecondBrainTheme.spacing
@@ -148,11 +167,11 @@ private fun EntryRow(item: Item, modifier: Modifier = Modifier, onLongPress: () 
         modifier = modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
-            .combinedClickable(onClick = {}, onLongClick = onLongPress),
+            .combinedClickable(onClick = onClick, onLongClick = onLongPress),
     ) {
         Spine(big = false)
         Column(modifier = Modifier.padding(start = space.md, top = space.sm, bottom = space.lg)) {
-            SbText(text = item.content, style = type.bodyLarge)
+            SbText(text = item.content, style = type.bodyLarge, maxLines = 3, overflow = TextOverflow.Ellipsis)
             Spacer(Modifier.height(space.xs))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 SbText(

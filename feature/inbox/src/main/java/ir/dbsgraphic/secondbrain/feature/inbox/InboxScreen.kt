@@ -41,11 +41,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ir.dbsgraphic.secondbrain.core.data.ItemType
 import ir.dbsgraphic.secondbrain.core.database.entity.Item
 import ir.dbsgraphic.secondbrain.core.designsystem.R as DsR
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbHairline
@@ -241,7 +243,13 @@ private fun InboxItemRow(
             .combinedClickable(onClick = onClick, onLongClick = onLongClick)
             .padding(vertical = space.lg),
     ) {
-        SbText(text = item.content, style = type.bodyLarge, modifier = Modifier.fillMaxWidth())
+        SbText(
+            text = item.content,
+            style = type.bodyLarge,
+            modifier = Modifier.fillMaxWidth(),
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+        )
         Spacer(Modifier.height(space.sm))
         Row(verticalAlignment = Alignment.CenterVertically) {
             SbText(text = relativeTimeFa(item.createdAt), style = type.monoSmall, color = colors.muted)

@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import ir.dbsgraphic.secondbrain.core.ai.TriageSuggestion
+import ir.dbsgraphic.secondbrain.core.data.ItemType
 import ir.dbsgraphic.secondbrain.core.database.entity.Item
 import ir.dbsgraphic.secondbrain.core.database.entity.Project
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbCard
