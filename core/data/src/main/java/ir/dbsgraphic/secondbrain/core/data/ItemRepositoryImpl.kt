@@ -78,6 +78,36 @@ class ItemRepositoryImpl @Inject constructor(
         return item.id
     }
 
+    override suspend fun captureBlob(
+        blobRef: String,
+        contentType: String,
+        capturedVia: String,
+        content: String,
+    ): String {
+        val text = content.trim().ifEmpty {
+            when (contentType) {
+                "image" -> "تصویر"
+                "voice" -> "یادداشت صوتی"
+                "file" -> "فایل"
+                else -> "یادداشت"
+            }
+        }
+        val now = clock.now()
+        val item = Item(
+            id = idGenerator.newId(),
+            createdAt = now,
+            updatedAt = now,
+            content = text,
+            blobRef = blobRef,
+            contentType = contentType,
+            capturedVia = capturedVia,
+            status = "inbox",
+            type = null,
+        )
+        itemDao.upsert(item)
+        return item.id
+    }
+
     override suspend fun triage(
         itemId: String,
         type: String,
@@ -113,20 +143,17 @@ class ItemRepositoryImpl @Inject constructor(
 
     /**
      * Turn raw user text into an FTS5 MATCH string. Normalized the same way the
-     * index is, split into tokens, each made a quoted prefix term so results
-     * appear as you type. Returns null when there's nothing to search.
+     * index is, split into clean tokens (letters/digits only), each made a
+     * **bareword prefix** term (`token*`) so results appear as you type. FTS5's
+     * `*` prefix operator applies to barewords — not quoted phrases — so we must
+     * not quote. Returns null when there's nothing to search.
      */
     private fun buildMatchQuery(raw: String): String? {
-        val normalized = PersianNormalizer.normalize(raw).trim()
-        if (normalized.isEmpty()) return null
+        val normalized = PersianNormalizer.normalize(raw)
         val tokens = normalized.split(Regex("\\s+"))
-            .map { it.filterNot { c -> c in FTS_RESERVED } }
-            .filter { it.isNotBlank() }
+            .map { token -> token.filter { it.isLetterOrDigit() } }
+            .filter { it.isNotEmpty() }
         if (tokens.isEmpty()) return null
-        return tokens.joinToString(" ") { "\"$it\"*" }
-    }
-
-    private companion object {
-        val FTS_RESERVED = setOf('"', '*', '(', ')', ':', '^', '-')
+        return tokens.joinToString(" ") { "$it*" }
     }
 }

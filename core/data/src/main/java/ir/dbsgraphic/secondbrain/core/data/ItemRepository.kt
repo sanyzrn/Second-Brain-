@@ -32,6 +32,17 @@ interface ItemRepository {
         contentType: String = "text",
     ): String
 
+    /**
+     * Capture a media blob recorded/taken in-app — voice or photo. Lands
+     * formless in the Inbox; [capturedVia] records the surface (voice|photo).
+     */
+    suspend fun captureBlob(
+        blobRef: String,
+        contentType: String,
+        capturedVia: String,
+        content: String = "",
+    ): String
+
     fun observeById(id: String): Flow<Item?>
 
     /** The whole life in reverse-chronological order — the Timeline (§19). */

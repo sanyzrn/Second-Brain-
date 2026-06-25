@@ -31,12 +31,16 @@ in **Space Mono** (the "instrument" voice). RTL is the host layout, not a mirror
 - **Offline-first**, no Firebase / no third-party cloud.
 - Custom design system on Compose Foundation; Material used only as a substrate.
 
-## Build status — Phase 3 (Resurface) + polish
+## Build status — Phase 4 (capture-speed surfaces)
 
 Capture → triage → projects, **FTS5 Persian search** (normalized index+query,
 bm25 ranking, kept in sync by triggers), the **Timeline** showpiece (Jalali day
 markers, pine spine), a swipeable home shell, splash screen, onboarding,
 theme settings (system/light/dark), About, and double-tap-back to exit.
+
+Capture surfaces: **share target** (text + image from any app), **photo** and
+**voice** capture from the quick-add bar, and a **Glance home-screen widget**
+for one-tap capture. All work with AI off.
 
 > **Replace the DBS logo:** `feature/settings/src/main/res/drawable/dbs_logo.xml`
 > is a placeholder (the real `Dbs_logo_single.webp` couldn't be fetched in the
