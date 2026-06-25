@@ -26,6 +26,7 @@ import javax.inject.Inject
 sealed interface InboxEvent {
     data object Captured : InboxEvent
     data object Triaged : InboxEvent
+    data object Trashed : InboxEvent
     data class Failed(val message: String) : InboxEvent
 }
 
@@ -150,6 +151,20 @@ class InboxViewModel @Inject constructor(
             } catch (e: Exception) {
                 _events.send(InboxEvent.Failed("مرتب‌سازی ممکن نشد"))
             }
+        }
+    }
+
+    /** Move the open item to Trash — recoverable (§13). */
+    fun trashCurrent() {
+        val target = triageTarget.value ?: return
+        viewModelScope.launch {
+            runCatching { repository.trash(target.id) }
+                .onSuccess {
+                    triageTarget.value = null
+                    triageSuggestion.value = null
+                    _events.send(InboxEvent.Trashed)
+                }
+                .onFailure { _events.send(InboxEvent.Failed("حذف ممکن نشد")) }
         }
     }
 

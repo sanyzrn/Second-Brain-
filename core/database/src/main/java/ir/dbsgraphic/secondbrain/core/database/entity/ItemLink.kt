@@ -2,6 +2,7 @@ package ir.dbsgraphic.secondbrain.core.database.entity
 
 import androidx.room.Entity
 import androidx.room.Index
+import kotlinx.serialization.Serializable
 
 /**
  * A real, queryable connection between two Items (Constitution §5: everything
@@ -16,6 +17,7 @@ import androidx.room.Index
     primaryKeys = ["fromId", "toId", "kind"],
     indices = [Index("toId"), Index("fromId")],
 )
+@Serializable
 data class ItemLink(
     val fromId: String,
     val toId: String,

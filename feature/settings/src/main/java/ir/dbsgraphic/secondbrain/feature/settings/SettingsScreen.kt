@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -39,6 +41,8 @@ fun SettingsRoute(
     onBack: () -> Unit,
     onOpenAbout: () -> Unit,
     onOpenAi: () -> Unit,
+    onOpenTrash: () -> Unit,
+    onOpenData: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
@@ -47,6 +51,8 @@ fun SettingsRoute(
         onThemeModeChange = viewModel::setThemeMode,
         onOpenAbout = onOpenAbout,
         onOpenAi = onOpenAi,
+        onOpenTrash = onOpenTrash,
+        onOpenData = onOpenData,
         onBack = onBack,
     )
 }
@@ -57,6 +63,8 @@ fun SettingsScreen(
     onThemeModeChange: (ThemeMode) -> Unit,
     onOpenAbout: () -> Unit,
     onOpenAi: () -> Unit,
+    onOpenTrash: () -> Unit,
+    onOpenData: () -> Unit,
     onBack: () -> Unit,
 ) {
     val colors = SecondBrainTheme.colors
@@ -68,6 +76,7 @@ fun SettingsScreen(
             .fillMaxSize()
             .background(colors.background)
             .windowInsetsPadding(WindowInsets.safeDrawing)
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = space.xl),
     ) {
         Spacer(Modifier.height(space.lg))
@@ -93,6 +102,17 @@ fun SettingsScreen(
 
         Spacer(Modifier.height(space.xl))
 
+        // ── Data & ownership ──────────────────────────────────────────────
+        SectionLabel("داده‌ها")
+        Spacer(Modifier.height(space.sm))
+        SbCard(padding = space.xs) {
+            NavRow(label = "سطل بازیافت", subtitle = "بازگردانی هرچه حذف کرده‌ای", onClick = onOpenTrash)
+            SbHairline(modifier = Modifier.padding(horizontal = space.md))
+            NavRow(label = "پشتیبان‌گیری و انتقال", subtitle = "برون‌بری و درون‌ریزی رمزگذاری‌شده", onClick = onOpenData)
+        }
+
+        Spacer(Modifier.height(space.xl))
+
         // ── More ──────────────────────────────────────────────────────────
         SectionLabel("بیشتر")
         Spacer(Modifier.height(space.sm))
@@ -102,11 +122,11 @@ fun SettingsScreen(
             NavRow(label = "درباره", subtitle = "سازنده، نسخه و راه‌های تماس", onClick = onOpenAbout)
         }
 
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(space.xxl))
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             SbText(text = AppInfo.VERSION_LABEL, style = type.monoSmall, color = colors.muted)
         }
-        Spacer(Modifier.height(space.lg))
+        Spacer(Modifier.height(space.xl))
     }
 }
 

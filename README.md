@@ -31,6 +31,13 @@ in **Space Mono** (the "instrument" voice). RTL is the host layout, not a mirror
 - **Offline-first**, no Firebase / no third-party cloud.
 - Custom design system on Compose Foundation; Material used only as a substrate.
 
+## Build status — Phase 6 (trust & ownership)
+
+A recoverable **Trash** for every deletion (soft-delete → restore to its prior
+place → delete-forever / empty), and **encrypted export/import** via SAF
+(AES-256-GCM with a Keystore key; whole-DB backup, import merges, nothing is
+destroyed). Both reachable from Settings → داده‌ها.
+
 ## Build status — Phase 5 (optional AI assistant)
 
 AI is **off by default** and reached only through a single `AIProvider`

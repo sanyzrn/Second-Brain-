@@ -7,6 +7,7 @@ import ir.dbsgraphic.secondbrain.core.database.dao.SearchDao
 import ir.dbsgraphic.secondbrain.core.database.entity.Item
 import ir.dbsgraphic.secondbrain.core.database.entity.ItemLink
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import javax.inject.Inject
 
@@ -27,6 +28,35 @@ class ItemRepositoryImpl @Inject constructor(
         if (trimmed.isEmpty()) return
         val item = itemDao.getById(id) ?: return
         itemDao.update(item.copy(content = trimmed, updatedAt = clock.now()))
+    }
+
+    override fun observeTrash(): Flow<List<Item>> = itemDao.observeTrashed()
+
+    override suspend fun trash(id: String) {
+        val item = itemDao.getById(id) ?: return
+        itemDao.update(item.copy(status = "trashed", updatedAt = clock.now()))
+    }
+
+    override suspend fun restore(id: String) {
+        val item = itemDao.getById(id) ?: return
+        val restored = if (item.type != null) "triaged" else "inbox"
+        itemDao.update(item.copy(status = restored, updatedAt = clock.now()))
+    }
+
+    override suspend fun deleteForever(id: String) {
+        val item = itemDao.getById(id) ?: return
+        deleteBlob(item.blobRef)
+        itemDao.deleteById(id)
+    }
+
+    override suspend fun emptyTrash() {
+        itemDao.observeTrashed().first().forEach { deleteBlob(it.blobRef) }
+        itemDao.deleteAllTrashed()
+    }
+
+    private fun deleteBlob(blobRef: String?) {
+        if (blobRef.isNullOrBlank()) return
+        runCatching { java.io.File(blobRef).delete() }
     }
 
     override fun observeById(id: String): Flow<Item?> = itemDao.observeById(id)

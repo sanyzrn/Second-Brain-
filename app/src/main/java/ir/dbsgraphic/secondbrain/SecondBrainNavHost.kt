@@ -11,7 +11,9 @@ import ir.dbsgraphic.secondbrain.feature.project.ProjectRoute
 import ir.dbsgraphic.secondbrain.feature.search.SearchRoute
 import ir.dbsgraphic.secondbrain.feature.settings.AboutRoute
 import ir.dbsgraphic.secondbrain.feature.settings.AiSettingsRoute
+import ir.dbsgraphic.secondbrain.feature.settings.DataRoute
 import ir.dbsgraphic.secondbrain.feature.settings.SettingsRoute
+import ir.dbsgraphic.secondbrain.feature.settings.TrashRoute
 
 object Routes {
     const val ONBOARDING = "onboarding"
@@ -22,6 +24,8 @@ object Routes {
     const val SETTINGS = "settings"
     const val ABOUT = "about"
     const val AI = "ai_settings"
+    const val TRASH = "trash"
+    const val DATA = "data"
     fun project(id: String) = "project/$id"
 }
 
@@ -76,6 +80,8 @@ fun SecondBrainNavHost(
                 onBack = { navController.popBackStack() },
                 onOpenAbout = { navController.navigate(Routes.ABOUT) },
                 onOpenAi = { navController.navigate(Routes.AI) },
+                onOpenTrash = { navController.navigate(Routes.TRASH) },
+                onOpenData = { navController.navigate(Routes.DATA) },
             )
         }
 
@@ -85,6 +91,14 @@ fun SecondBrainNavHost(
 
         composable(Routes.AI) {
             AiSettingsRoute(onBack = { navController.popBackStack() })
+        }
+
+        composable(Routes.TRASH) {
+            TrashRoute(onBack = { navController.popBackStack() })
+        }
+
+        composable(Routes.DATA) {
+            DataRoute(onBack = { navController.popBackStack() })
         }
     }
 }

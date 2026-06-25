@@ -3,6 +3,7 @@ package ir.dbsgraphic.secondbrain.core.database.entity
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
 /**
  * A Project is a **hub, not a silo** (Constitution §4). It stores only its own
@@ -14,6 +15,7 @@ import androidx.room.PrimaryKey
     tableName = "projects",
     indices = [Index("name")],
 )
+@Serializable
 data class Project(
     @PrimaryKey val id: String,
     val name: String,

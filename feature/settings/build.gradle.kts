@@ -26,6 +26,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
 
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.activity.compose) // SAF document launchers
     implementation(libs.androidx.ui)
     implementation(libs.androidx.foundation)
     implementation(libs.androidx.ui.tooling.preview)

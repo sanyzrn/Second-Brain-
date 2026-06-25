@@ -22,4 +22,10 @@ interface ProjectDao {
     /** Live item count for a project — derived, never stored on the project. */
     @Query("SELECT COUNT(*) FROM items WHERE projectId = :id AND status != 'trashed'")
     fun observeItemCount(id: String): Flow<Int>
+
+    @Query("SELECT * FROM projects")
+    suspend fun getAll(): List<Project>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertAll(projects: List<Project>)
 }

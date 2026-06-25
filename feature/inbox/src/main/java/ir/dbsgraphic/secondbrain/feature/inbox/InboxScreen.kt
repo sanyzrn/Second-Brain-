@@ -64,6 +64,8 @@ fun InboxRoute(viewModel: InboxViewModel = hiltViewModel()) {
             when (event) {
                 InboxEvent.Captured, InboxEvent.Triaged ->
                     haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                InboxEvent.Trashed ->
+                    Toast.makeText(context, "به سطل منتقل شد", Toast.LENGTH_SHORT).show()
                 is InboxEvent.Failed ->
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
             }
@@ -104,6 +106,7 @@ fun InboxRoute(viewModel: InboxViewModel = hiltViewModel()) {
         onDismissTriage = viewModel::dismissTriage,
         onConfirmTriage = viewModel::confirmTriage,
         onCreateProject = viewModel::createProject,
+        onTrash = viewModel::trashCurrent,
         onTakePhoto = {
             val file = createBlobFile(context, "jpg")
             photoPath = file.absolutePath
@@ -135,6 +138,7 @@ fun InboxScreen(
     onDismissTriage: () -> Unit,
     onConfirmTriage: (ItemType, String?, List<String>) -> Unit,
     onCreateProject: (String) -> Unit,
+    onTrash: () -> Unit,
     onTakePhoto: () -> Unit,
     onRecordToggle: () -> Unit,
 ) {
@@ -185,6 +189,7 @@ fun InboxScreen(
             onDismiss = onDismissTriage,
             onConfirm = onConfirmTriage,
             onCreateProject = onCreateProject,
+            onDelete = onTrash,
         )
     }
 }
@@ -344,7 +349,7 @@ private fun InboxItemsPreview() {
             isRecording = false,
             onDraftChange = {}, onCapture = {}, onItemClick = {},
             onDismissTriage = {}, onConfirmTriage = { _, _, _ -> }, onCreateProject = {},
-            onTakePhoto = {}, onRecordToggle = {},
+            onTrash = {}, onTakePhoto = {}, onRecordToggle = {},
         )
     }
 }

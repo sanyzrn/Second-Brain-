@@ -46,6 +46,23 @@ interface ItemRepository {
     /** Replace an item's text — used by AI enrichment (transcription, OCR). */
     suspend fun updateContent(id: String, content: String)
 
+    // ── Trash: nothing is ever lost (Constitution §13) ──────────────────────
+
+    /** Items currently in the Trash. */
+    fun observeTrash(): Flow<List<Item>>
+
+    /** Soft-delete: move to Trash (recoverable). */
+    suspend fun trash(id: String)
+
+    /** Restore from Trash to its prior place (project → triaged, else inbox). */
+    suspend fun restore(id: String)
+
+    /** Permanently delete one item (and its blob). */
+    suspend fun deleteForever(id: String)
+
+    /** Permanently empty the Trash (and blobs). */
+    suspend fun emptyTrash()
+
     fun observeById(id: String): Flow<Item?>
 
     /** The whole life in reverse-chronological order — the Timeline (§19). */

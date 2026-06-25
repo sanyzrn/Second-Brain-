@@ -52,6 +52,7 @@ fun TriageSheet(
     onDismiss: () -> Unit,
     onConfirm: (type: ItemType, projectId: String?, tags: List<String>) -> Unit,
     onCreateProject: (String) -> Unit,
+    onDelete: () -> Unit,
 ) {
     val colors = SecondBrainTheme.colors
     val type = SecondBrainTheme.type
@@ -235,6 +236,11 @@ fun TriageSheet(
                     style = type.monoSmall,
                     color = colors.muted,
                 )
+            }
+
+            Spacer(Modifier.height(space.lg))
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                SbTextButton(label = "حذف به سطل", onClick = onDelete, color = colors.muted)
             }
         }
     }

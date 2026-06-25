@@ -41,4 +41,22 @@ interface ItemDao {
 
     @Query("SELECT COUNT(*) FROM items WHERE status = 'inbox'")
     fun observeInboxCount(): Flow<Int>
+
+    /** The recoverable Trash (Constitution §13). */
+    @Query("SELECT * FROM items WHERE status = 'trashed' ORDER BY updatedAt DESC")
+    fun observeTrashed(): Flow<List<Item>>
+
+    @Query("DELETE FROM items WHERE id = :id")
+    suspend fun deleteById(id: String)
+
+    @Query("DELETE FROM items WHERE status = 'trashed'")
+    suspend fun deleteAllTrashed()
+
+    // ── Backup (export/import everything) ───────────────────────────────────
+
+    @Query("SELECT * FROM items")
+    suspend fun getAll(): List<Item>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertAll(items: List<Item>)
 }

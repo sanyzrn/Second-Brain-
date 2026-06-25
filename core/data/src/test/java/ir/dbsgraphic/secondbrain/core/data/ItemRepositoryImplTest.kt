@@ -46,6 +46,23 @@ internal class FakeItemDao : ItemDao {
 
     override fun observeInboxCount(): Flow<Int> =
         items.map { list -> list.count { it.status == "inbox" } }
+
+    override fun observeTrashed(): Flow<List<Item>> =
+        items.map { list -> list.filter { it.status == "trashed" }.sortedByDescending { it.updatedAt } }
+
+    override suspend fun deleteById(id: String) {
+        items.value = items.value.filterNot { it.id == id }
+    }
+
+    override suspend fun deleteAllTrashed() {
+        items.value = items.value.filterNot { it.status == "trashed" }
+    }
+
+    override suspend fun getAll(): List<Item> = items.value
+
+    override suspend fun upsertAll(list: List<Item>) {
+        list.forEach { upsert(it) }
+    }
 }
 
 internal class FakeItemLinkDao(private val itemDao: FakeItemDao) : ItemLinkDao {
@@ -149,5 +166,28 @@ class ItemRepositoryImplTest {
         assertThrows(IllegalArgumentException::class.java) {
             kotlinx.coroutines.runBlocking { repo.link(a, a) }
         }
+    }
+
+    @Test
+    fun `trash hides an item and restore brings it back to the inbox`() = runTest {
+        val id = repo.capture("یک چیز")
+        repo.trash(id)
+        assertTrue(dao.observeInbox().first().isEmpty())
+        assertEquals(id, repo.observeTrash().first().single().id)
+
+        repo.restore(id)
+        assertTrue(repo.observeTrash().first().isEmpty())
+        assertEquals("inbox", dao.getById(id)!!.status)
+    }
+
+    @Test
+    fun `restore returns a triaged item to its project`() = runTest {
+        val id = repo.capture("کار خانه")
+        repo.triage(id, type = "task", projectId = "p1")
+        repo.trash(id)
+        repo.restore(id)
+        val item = dao.getById(id)!!
+        assertEquals("triaged", item.status)
+        assertEquals("p1", item.projectId)
     }
 }

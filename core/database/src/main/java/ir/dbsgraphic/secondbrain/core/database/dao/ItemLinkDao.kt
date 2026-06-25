@@ -38,4 +38,10 @@ interface ItemLinkDao {
         """,
     )
     fun observeOutgoing(id: String): Flow<List<Item>>
+
+    @Query("SELECT * FROM item_links")
+    suspend fun getAll(): List<ItemLink>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(links: List<ItemLink>)
 }
