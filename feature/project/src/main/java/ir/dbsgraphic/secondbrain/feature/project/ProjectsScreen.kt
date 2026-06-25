@@ -4,11 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -18,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ir.dbsgraphic.secondbrain.core.database.entity.Project
@@ -31,18 +33,16 @@ import ir.dbsgraphic.secondbrain.core.designsystem.util.relativeTimeFa
 @Composable
 fun ProjectsRoute(
     onOpenProject: (String) -> Unit,
-    onBack: () -> Unit,
     viewModel: ProjectsViewModel = hiltViewModel(),
 ) {
     val projects by viewModel.projects.collectAsStateWithLifecycle()
-    ProjectsScreen(projects = projects, onOpenProject = onOpenProject, onBack = onBack)
+    ProjectsScreen(projects = projects, onOpenProject = onOpenProject)
 }
 
 @Composable
 fun ProjectsScreen(
     projects: List<Project>,
     onOpenProject: (String) -> Unit,
-    onBack: () -> Unit,
 ) {
     val colors = SecondBrainTheme.colors
     val type = SecondBrainTheme.type
@@ -51,14 +51,11 @@ fun ProjectsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(colors.background)
-            .windowInsetsPadding(WindowInsets.safeDrawing)
+            .windowInsetsPadding(
+                WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom),
+            )
             .padding(horizontal = space.xl),
     ) {
-        Spacer(Modifier.height(space.lg))
-        TopRow(title = "پروژه‌ها", onBack = onBack)
-        Spacer(Modifier.height(space.lg))
-
         if (projects.isEmpty()) {
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -96,29 +93,15 @@ fun ProjectsScreen(
     }
 }
 
+/** Shared top row (title + back) used by the Project detail screen. */
 @Composable
 internal fun TopRow(title: String, onBack: () -> Unit) {
-    androidx.compose.foundation.layout.Row(
+    Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         SbText(text = title, style = SecondBrainTheme.type.title)
         SbTextButton(label = "بازگشت", onClick = onBack)
-    }
-}
-
-@Preview(showBackground = true, locale = "fa")
-@Composable
-private fun ProjectsPreview() {
-    SecondBrainTheme {
-        ProjectsScreen(
-            projects = listOf(
-                Project(id = "1", name = "خانه", createdAt = 0, updatedAt = System.currentTimeMillis()),
-                Project(id = "2", name = "کار", createdAt = 0, updatedAt = System.currentTimeMillis() - 86_400_000),
-            ),
-            onOpenProject = {},
-            onBack = {},
-        )
     }
 }

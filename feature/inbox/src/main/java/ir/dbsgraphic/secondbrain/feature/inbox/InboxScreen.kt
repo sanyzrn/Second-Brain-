@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
@@ -36,17 +38,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ir.dbsgraphic.secondbrain.core.database.entity.Item
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbHairline
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbText
-import ir.dbsgraphic.secondbrain.core.designsystem.component.SbTextButton
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbTextField
 import ir.dbsgraphic.secondbrain.core.designsystem.theme.SecondBrainTheme
 import ir.dbsgraphic.secondbrain.core.designsystem.util.relativeTimeFa
-import ir.dbsgraphic.secondbrain.core.designsystem.util.toPersianDigits
 
 @Composable
-fun InboxRoute(
-    onOpenProjects: () -> Unit,
-    viewModel: InboxViewModel = hiltViewModel(),
-) {
+fun InboxRoute(viewModel: InboxViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
@@ -67,7 +64,6 @@ fun InboxRoute(
         onDraftChange = viewModel::onDraftChange,
         onCapture = viewModel::capture,
         onItemClick = viewModel::openTriage,
-        onOpenProjects = onOpenProjects,
         onDismissTriage = viewModel::dismissTriage,
         onConfirmTriage = viewModel::confirmTriage,
         onCreateProject = viewModel::createProject,
@@ -80,7 +76,6 @@ fun InboxScreen(
     onDraftChange: (String) -> Unit,
     onCapture: () -> Unit,
     onItemClick: (Item) -> Unit,
-    onOpenProjects: () -> Unit,
     onDismissTriage: () -> Unit,
     onConfirmTriage: (ItemType, String?, List<String>) -> Unit,
     onCreateProject: (String) -> Unit,
@@ -92,17 +87,14 @@ fun InboxScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(colors.background)
-            .windowInsetsPadding(WindowInsets.safeDrawing)
+            .windowInsetsPadding(
+                WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom),
+            )
             .padding(horizontal = space.xl),
     ) {
-        Spacer(Modifier.height(space.lg))
-        InboxHeader(content = state.content, onOpenProjects = onOpenProjects)
-        Spacer(Modifier.height(space.lg))
-
         Box(modifier = Modifier.weight(1f)) {
             when (val content = state.content) {
-                InboxContent.Loading -> Unit // silent; first frame, no flash
+                InboxContent.Loading -> Unit
                 InboxContent.Empty -> InboxEmptyState()
                 is InboxContent.Error -> SbText(
                     text = content.message,
@@ -124,7 +116,6 @@ fun InboxScreen(
         Spacer(Modifier.height(space.md))
     }
 
-    // Triage surface, shown when an item is opened.
     state.triageTarget?.let { target ->
         TriageSheet(
             item = target,
@@ -137,38 +128,13 @@ fun InboxScreen(
 }
 
 @Composable
-private fun InboxHeader(content: InboxContent, onOpenProjects: () -> Unit) {
-    val colors = SecondBrainTheme.colors
-    val type = SecondBrainTheme.type
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            SbText(text = "صندوق ورودی", style = type.title)
-            if (content is InboxContent.Items) {
-                SbText(
-                    text = "  ${content.items.size.toString().toPersianDigits()} مورد",
-                    style = type.caption,
-                    color = colors.muted,
-                )
-            }
-        }
-        SbTextButton(label = "پروژه‌ها", onClick = onOpenProjects)
-    }
-}
-
-@Composable
 private fun InboxList(items: List<Item>, onItemClick: (Item) -> Unit) {
     val space = SecondBrainTheme.spacing
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = space.md),
+        contentPadding = PaddingValues(top = space.sm, bottom = space.md),
     ) {
         items(items = items, key = { it.id }) { item ->
-            // New captures materialize and reflow with a spatial animation;
-            // triaged items animate out of the list.
             InboxItemRow(
                 item = item,
                 onClick = { onItemClick(item) },
@@ -191,18 +157,10 @@ private fun InboxItemRow(item: Item, onClick: () -> Unit, modifier: Modifier = M
             .clickable(onClick = onClick)
             .padding(vertical = space.lg),
     ) {
-        SbText(
-            text = item.content,
-            style = type.bodyLarge,
-            modifier = Modifier.fillMaxWidth(),
-        )
+        SbText(text = item.content, style = type.bodyLarge, modifier = Modifier.fillMaxWidth())
         Spacer(Modifier.height(space.sm))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            SbText(
-                text = relativeTimeFa(item.createdAt),
-                style = type.monoSmall,
-                color = colors.muted,
-            )
+            SbText(text = relativeTimeFa(item.createdAt), style = type.monoSmall, color = colors.muted)
             Spacer(Modifier.width(space.sm))
             Box(
                 Modifier
@@ -282,41 +240,19 @@ private fun QuickAddBar(
 
 @Preview(showBackground = true, locale = "fa")
 @Composable
-private fun InboxEmptyPreview() {
-    SecondBrainTheme {
-        InboxScreen(
-            state = InboxUiState(content = InboxContent.Empty),
-            onDraftChange = {}, onCapture = {}, onItemClick = {}, onOpenProjects = {},
-            onDismissTriage = {}, onConfirmTriage = { _, _, _ -> }, onCreateProject = {},
-        )
-    }
-}
-
-@Preview(showBackground = true, locale = "fa")
-@Composable
 private fun InboxItemsPreview() {
     SecondBrainTheme {
         InboxScreen(
             state = InboxUiState(
                 content = InboxContent.Items(
                     listOf(
-                        Item(
-                            id = "1",
-                            createdAt = System.currentTimeMillis() - 120_000,
-                            updatedAt = 0,
-                            content = "ایده‌ای برای صفحه‌ی شروع: نوار فرمان بالا باشد یا پایین؟",
-                        ),
-                        Item(
-                            id = "2",
-                            createdAt = System.currentTimeMillis() - 7_200_000,
-                            updatedAt = 0,
-                            content = "یادم باشد فردا با تیم طراحی هماهنگ کنم.",
-                        ),
+                        Item(id = "1", createdAt = System.currentTimeMillis() - 120_000, updatedAt = 0, content = "ایده‌ای برای صفحه‌ی شروع"),
+                        Item(id = "2", createdAt = System.currentTimeMillis() - 7_200_000, updatedAt = 0, content = "فردا با تیم طراحی هماهنگ کن."),
                     ),
                 ),
                 draft = "یک فکر تازه",
             ),
-            onDraftChange = {}, onCapture = {}, onItemClick = {}, onOpenProjects = {},
+            onDraftChange = {}, onCapture = {}, onItemClick = {},
             onDismissTriage = {}, onConfirmTriage = { _, _, _ -> }, onCreateProject = {},
         )
     }

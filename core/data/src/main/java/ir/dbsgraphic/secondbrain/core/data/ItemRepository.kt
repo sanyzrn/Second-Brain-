@@ -24,6 +24,12 @@ interface ItemRepository {
 
     fun observeById(id: String): Flow<Item?>
 
+    /** The whole life in reverse-chronological order — the Timeline (§19). */
+    fun observeTimeline(): Flow<List<Item>>
+
+    /** Instant ranked full-text search with Persian normalization (§6). */
+    fun search(rawQuery: String): Flow<List<Item>>
+
     /** A project's contents, derived by filtering Items (§4). */
     fun observeByProject(projectId: String): Flow<List<Item>>
 

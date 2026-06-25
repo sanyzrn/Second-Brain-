@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Framework theme only as a launch substrate. The real look is the
-         Compose design system; we deliberately avoid Material component theming. -->
-    <style name="Theme.SecondBrain" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:windowBackground">@color/sb_paper</item>
+    <!-- Base app theme. Framework theme only as a launch substrate; the real
+         look is the Compose design system. windowBackground tracks light/dark
+         (sb_splash has a values-night override) to avoid a flash on launch. -->
+    <style name="Theme.SecondBrain" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/sb_splash</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <!-- Launch (splash) theme. Swapped to Theme.SecondBrain after the splash. -->
+    <style name="Theme.SecondBrain.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/sb_splash</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_brand_mark</item>
+        <item name="postSplashScreenTheme">@style/Theme.SecondBrain</item>
     </style>
 </resources>

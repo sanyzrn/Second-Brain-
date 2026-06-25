@@ -2,12 +2,14 @@ package ir.dbsgraphic.secondbrain.core.data
 
 import ir.dbsgraphic.secondbrain.core.database.dao.ItemDao
 import ir.dbsgraphic.secondbrain.core.database.dao.ItemLinkDao
+import ir.dbsgraphic.secondbrain.core.database.dao.SearchDao
 import ir.dbsgraphic.secondbrain.core.database.entity.Item
 import ir.dbsgraphic.secondbrain.core.database.entity.ItemLink
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -72,14 +74,20 @@ internal class FakeItemLinkDao(private val itemDao: FakeItemDao) : ItemLinkDao {
         }
 }
 
+internal class FakeSearchDao : SearchDao {
+    override fun search(matchQuery: String, limit: Int): Flow<List<Item>> = flowOf(emptyList())
+}
+
 class ItemRepositoryImplTest {
 
     private val dao = FakeItemDao()
     private val linkDao = FakeItemLinkDao(dao)
+    private val searchDao = FakeSearchDao()
     private var counter = 0
     private val repo = ItemRepositoryImpl(
         itemDao = dao,
         itemLinkDao = linkDao,
+        searchDao = searchDao,
         clock = { 1_000L },
         idGenerator = { "id-${++counter}" },
     )

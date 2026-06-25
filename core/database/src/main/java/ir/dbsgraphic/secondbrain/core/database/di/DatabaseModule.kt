@@ -8,10 +8,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import ir.dbsgraphic.secondbrain.core.database.MIGRATION_1_2
+import ir.dbsgraphic.secondbrain.core.database.MIGRATION_2_3
 import ir.dbsgraphic.secondbrain.core.database.SecondBrainDatabase
 import ir.dbsgraphic.secondbrain.core.database.dao.ItemDao
 import ir.dbsgraphic.secondbrain.core.database.dao.ItemLinkDao
 import ir.dbsgraphic.secondbrain.core.database.dao.ProjectDao
+import ir.dbsgraphic.secondbrain.core.database.dao.SearchDao
 import ir.dbsgraphic.secondbrain.core.security.DatabaseKeyProvider
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import javax.inject.Singleton
@@ -37,7 +39,7 @@ object DatabaseModule {
             SecondBrainDatabase.NAME,
         )
             .openHelperFactory(factory)
-            .addMigrations(MIGRATION_1_2)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             .build()
     }
 
@@ -49,4 +51,7 @@ object DatabaseModule {
 
     @Provides
     fun provideItemLinkDao(database: SecondBrainDatabase): ItemLinkDao = database.itemLinkDao()
+
+    @Provides
+    fun provideSearchDao(database: SecondBrainDatabase): SearchDao = database.searchDao()
 }
