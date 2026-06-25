@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Voice capture. Camera uses the system camera app, so no CAMERA permission. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
     <application
         android:name=".SecondBrainApplication"
         android:allowBackup="false"
@@ -33,6 +36,29 @@
                 <data android:mimeType="image/*" />
             </intent-filter>
         </activity>
+
+        <!-- Hands captured photos to the camera app via a content URI. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <!-- One-tap capture widget (Phase 4). -->
+        <receiver
+            android:name=".widget.SecondBrainWidgetReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/sb_widget_info" />
+        </receiver>
     </application>
 
 </manifest>

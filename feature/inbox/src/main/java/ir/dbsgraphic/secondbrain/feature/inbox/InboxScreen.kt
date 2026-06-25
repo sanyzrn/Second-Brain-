@@ -1,6 +1,9 @@
 package ir.dbsgraphic.secondbrain.feature.inbox
 
+import android.Manifest
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,20 +26,28 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ir.dbsgraphic.secondbrain.core.database.entity.Item
+import ir.dbsgraphic.secondbrain.core.designsystem.R as DsR
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbHairline
+import ir.dbsgraphic.secondbrain.core.designsystem.component.SbIconButton
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbText
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbTextField
 import ir.dbsgraphic.secondbrain.core.designsystem.theme.SecondBrainTheme
@@ -59,26 +70,73 @@ fun InboxRoute(viewModel: InboxViewModel = hiltViewModel()) {
         }
     }
 
+    // Photo capture via the system camera app (no CAMERA permission needed).
+    var photoPath by remember { mutableStateOf<String?>(null) }
+    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success) photoPath?.let(viewModel::capturePhoto)
+        photoPath = null
+    }
+
+    // Voice capture.
+    val recorder = remember { VoiceRecorder(context) }
+    var isRecording by remember { mutableStateOf(false) }
+    var voicePath by remember { mutableStateOf<String?>(null) }
+    DisposableEffect(Unit) { onDispose { recorder.release() } }
+
+    fun beginRecording() {
+        val file = createBlobFile(context, "m4a")
+        voicePath = file.absolutePath
+        isRecording = recorder.start(file.absolutePath)
+        if (!isRecording) voicePath = null
+    }
+
+    val micPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) beginRecording()
+        else Toast.makeText(context, "برای ضبط صدا، اجازه لازم است", Toast.LENGTH_SHORT).show()
+    }
+
     InboxScreen(
         state = state,
+        isRecording = isRecording,
         onDraftChange = viewModel::onDraftChange,
         onCapture = viewModel::capture,
         onItemClick = viewModel::openTriage,
         onDismissTriage = viewModel::dismissTriage,
         onConfirmTriage = viewModel::confirmTriage,
         onCreateProject = viewModel::createProject,
+        onTakePhoto = {
+            val file = createBlobFile(context, "jpg")
+            photoPath = file.absolutePath
+            val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+            runCatching { cameraLauncher.launch(uri) }
+        },
+        onRecordToggle = {
+            if (isRecording) {
+                val ok = recorder.stop()
+                isRecording = false
+                if (ok) voicePath?.let(viewModel::captureVoice)
+                voicePath = null
+            } else if (hasAudioPermission(context)) {
+                beginRecording()
+            } else {
+                micPermission.launch(Manifest.permission.RECORD_AUDIO)
+            }
+        },
     )
 }
 
 @Composable
 fun InboxScreen(
     state: InboxUiState,
+    isRecording: Boolean,
     onDraftChange: (String) -> Unit,
     onCapture: () -> Unit,
     onItemClick: (Item) -> Unit,
     onDismissTriage: () -> Unit,
     onConfirmTriage: (ItemType, String?, List<String>) -> Unit,
     onCreateProject: (String) -> Unit,
+    onTakePhoto: () -> Unit,
+    onRecordToggle: () -> Unit,
 ) {
     val colors = SecondBrainTheme.colors
     val type = SecondBrainTheme.type
@@ -110,8 +168,11 @@ fun InboxScreen(
             draft = state.draft,
             canCapture = state.canCapture,
             isSaving = state.isSaving,
+            isRecording = isRecording,
             onDraftChange = onDraftChange,
             onCapture = onCapture,
+            onTakePhoto = onTakePhoto,
+            onRecordToggle = onRecordToggle,
         )
         Spacer(Modifier.height(space.md))
     }
@@ -199,8 +260,11 @@ private fun QuickAddBar(
     draft: String,
     canCapture: Boolean,
     isSaving: Boolean,
+    isRecording: Boolean,
     onDraftChange: (String) -> Unit,
     onCapture: () -> Unit,
+    onTakePhoto: () -> Unit,
+    onRecordToggle: () -> Unit,
 ) {
     val colors = SecondBrainTheme.colors
     val type = SecondBrainTheme.type
@@ -211,9 +275,23 @@ private fun QuickAddBar(
             .fillMaxWidth()
             .clip(SecondBrainTheme.shapes.large)
             .background(colors.surface)
-            .padding(horizontal = space.lg, vertical = space.md),
+            .padding(horizontal = space.lg, vertical = space.sm),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        if (isRecording) {
+            Box(
+                Modifier
+                    .height(10.dp)
+                    .width(10.dp)
+                    .clip(CircleShape)
+                    .background(RecordRed),
+            )
+            Spacer(Modifier.width(space.md))
+            SbText(text = "در حال ضبط…", style = type.body, modifier = Modifier.weight(1f))
+            PillButton(label = "پایان", onClick = onRecordToggle)
+            return@Row
+        }
+
         SbTextField(
             value = draft,
             onValueChange = onDraftChange,
@@ -221,22 +299,32 @@ private fun QuickAddBar(
             placeholder = "چه چیزی در ذهنته؟",
             textStyle = type.body,
         )
-        Spacer(Modifier.width(space.md))
-        Box(
-            modifier = Modifier
-                .clip(SecondBrainTheme.shapes.medium)
-                .background(if (canCapture) colors.accent else colors.hairline)
-                .clickable(enabled = canCapture, onClick = onCapture)
-                .padding(horizontal = space.lg, vertical = space.sm),
-        ) {
-            SbText(
-                text = if (isSaving) "…" else "ثبت",
-                style = type.label,
-                color = if (canCapture) colors.onAccent else colors.muted,
-            )
+        Spacer(Modifier.width(space.sm))
+        if (canCapture) {
+            PillButton(label = if (isSaving) "…" else "ثبت", onClick = onCapture)
+        } else {
+            SbIconButton(icon = DsR.drawable.ic_mic, contentDescription = "ضبط صدا", onClick = onRecordToggle)
+            SbIconButton(icon = DsR.drawable.ic_camera, contentDescription = "عکس", onClick = onTakePhoto)
         }
     }
 }
+
+@Composable
+private fun PillButton(label: String, onClick: () -> Unit) {
+    val colors = SecondBrainTheme.colors
+    val space = SecondBrainTheme.spacing
+    Box(
+        modifier = Modifier
+            .clip(SecondBrainTheme.shapes.medium)
+            .background(colors.accent)
+            .clickable(onClick = onClick)
+            .padding(horizontal = space.lg, vertical = space.sm),
+    ) {
+        SbText(text = label, style = SecondBrainTheme.type.label, color = colors.onAccent)
+    }
+}
+
+private val RecordRed = Color(0xFFC0563E)
 
 @Preview(showBackground = true, locale = "fa")
 @Composable
@@ -252,8 +340,10 @@ private fun InboxItemsPreview() {
                 ),
                 draft = "یک فکر تازه",
             ),
+            isRecording = false,
             onDraftChange = {}, onCapture = {}, onItemClick = {},
             onDismissTriage = {}, onConfirmTriage = { _, _, _ -> }, onCreateProject = {},
+            onTakePhoto = {}, onRecordToggle = {},
         )
     }
 }

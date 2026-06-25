@@ -33,7 +33,7 @@ fun SbText(
     BasicText(
         text = text,
         modifier = modifier,
-        style = style.merge(TextStyle(color = color, textAlign = align)),
+        style = style.merge(TextStyle(color = color, textAlign = align ?: TextAlign.Unspecified)),
     )
 }
 

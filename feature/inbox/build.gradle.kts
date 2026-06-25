@@ -34,6 +34,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
 
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.activity.compose) // result launchers (camera, permission)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.foundation)
     implementation(libs.androidx.material3) // ModalBottomSheet behavior only, fully re-themed

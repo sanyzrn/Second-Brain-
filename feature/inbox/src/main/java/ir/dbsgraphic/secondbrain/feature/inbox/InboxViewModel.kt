@@ -89,6 +89,24 @@ class InboxViewModel @Inject constructor(
         }
     }
 
+    /** Persist a photo captured in-app (§2: capture speed). */
+    fun capturePhoto(path: String) {
+        viewModelScope.launch {
+            runCatching { repository.captureBlob(path, "image", "photo") }
+                .onSuccess { _events.send(InboxEvent.Captured) }
+                .onFailure { _events.send(InboxEvent.Failed("ثبت عکس نشد")) }
+        }
+    }
+
+    /** Persist a recorded voice note. */
+    fun captureVoice(path: String) {
+        viewModelScope.launch {
+            runCatching { repository.captureBlob(path, "voice", "voice") }
+                .onSuccess { _events.send(InboxEvent.Captured) }
+                .onFailure { _events.send(InboxEvent.Failed("ثبت صدا نشد")) }
+        }
+    }
+
     fun openTriage(item: Item) {
         triageTarget.value = item
     }
