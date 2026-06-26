@@ -9,8 +9,10 @@ import ir.dbsgraphic.secondbrain.core.data.Clock
 import ir.dbsgraphic.secondbrain.core.data.IdGenerator
 import ir.dbsgraphic.secondbrain.core.data.ItemRepository
 import ir.dbsgraphic.secondbrain.core.data.ItemRepositoryImpl
+import ir.dbsgraphic.secondbrain.core.data.CalendarMirror
 import ir.dbsgraphic.secondbrain.core.data.CalendarRepository
 import ir.dbsgraphic.secondbrain.core.data.CalendarRepositoryImpl
+import ir.dbsgraphic.secondbrain.core.data.DeviceCalendarMirror
 import ir.dbsgraphic.secondbrain.core.data.FinanceRepository
 import ir.dbsgraphic.secondbrain.core.data.FinanceRepositoryImpl
 import ir.dbsgraphic.secondbrain.core.data.HabitRepository
@@ -50,6 +52,10 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindCalendarRepository(impl: CalendarRepositoryImpl): CalendarRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindCalendarMirror(impl: DeviceCalendarMirror): CalendarMirror
 
     companion object {
         @Provides

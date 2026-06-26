@@ -47,8 +47,11 @@ Calendars, both ways, reached from **Settings → تقویم**:
 
 Calendar access is **off until granted** and every call degrades to empty/null,
 so the app is fully usable without it (the §12 spirit: integrations only add).
-Known limits: mirrored events aren't auto-removed when an item is trashed, and
-ICS import doesn't de-duplicate by UID — both are explicit, re-runnable actions.
+Lifecycle is handled: trashing, deleting, or clearing a reminder removes the
+mirrored event and clears the link (via a `CalendarMirror` abstraction, so the
+repo stays unit-testable); and ICS import **de-duplicates by UID** — our own
+exports round-trip back onto the source item, and re-importing a file is a
+no-op rather than a pile of copies.
 
 ## Build status — Phase 14 (Finance — expenses & installments)
 
