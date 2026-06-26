@@ -2,6 +2,7 @@ package ir.dbsgraphic.secondbrain.feature.itemdetail
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ir.dbsgraphic.secondbrain.core.data.ItemType
@@ -35,6 +37,7 @@ import ir.dbsgraphic.secondbrain.core.database.entity.Item
 import ir.dbsgraphic.secondbrain.core.database.entity.Project
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbCard
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbChip
+import ir.dbsgraphic.secondbrain.core.designsystem.component.SbHairline
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbPrimaryButton
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbText
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbTextButton
@@ -45,9 +48,12 @@ import ir.dbsgraphic.secondbrain.core.designsystem.util.JalaliDate
 @Composable
 fun ItemDetailRoute(
     onBack: () -> Unit,
+    onOpenItem: (String) -> Unit,
     viewModel: ItemDetailViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val linkQuery by viewModel.linkQuery.collectAsStateWithLifecycle()
+    val linkResults by viewModel.linkResults.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     LaunchedEffect(viewModel) {
@@ -64,10 +70,16 @@ fun ItemDetailRoute(
 
     ItemDetailScreen(
         state = state,
+        linkQuery = linkQuery,
+        linkResults = linkResults,
         onSave = viewModel::save,
         onTrash = viewModel::trash,
         onRestore = viewModel::restore,
         onDeleteForever = viewModel::deleteForever,
+        onOpenItem = onOpenItem,
+        onLinkQueryChange = viewModel::onLinkQueryChange,
+        onAddLink = viewModel::addLink,
+        onRemoveLink = viewModel::removeLink,
         onBack = onBack,
     )
 }
@@ -75,10 +87,16 @@ fun ItemDetailRoute(
 @Composable
 fun ItemDetailScreen(
     state: ItemDetailUiState,
+    linkQuery: String,
+    linkResults: List<Item>,
     onSave: (String, ItemType?, String?, List<String>) -> Unit,
     onTrash: () -> Unit,
     onRestore: () -> Unit,
     onDeleteForever: () -> Unit,
+    onOpenItem: (String) -> Unit,
+    onLinkQueryChange: (String) -> Unit,
+    onAddLink: (String) -> Unit,
+    onRemoveLink: (ConnectedItem) -> Unit,
     onBack: () -> Unit,
 ) {
     val colors = SecondBrainTheme.colors
@@ -189,6 +207,18 @@ fun ItemDetailScreen(
             }
         }
 
+        // ── Connections (§5) ────────────────────────────────────────────────
+        Spacer(Modifier.height(space.xl))
+        ConnectionsSection(
+            connections = state.connections,
+            linkQuery = linkQuery,
+            linkResults = linkResults,
+            onOpenItem = onOpenItem,
+            onLinkQueryChange = onLinkQueryChange,
+            onAddLink = onAddLink,
+            onRemoveLink = onRemoveLink,
+        )
+
         Spacer(Modifier.height(space.xl))
         MetadataCard(item)
 
@@ -260,6 +290,77 @@ private fun MetaRow(label: String, value: String) {
     ) {
         SbText(text = label, style = type.body, color = colors.muted)
         SbText(text = value, style = type.monoSmall, color = colors.text)
+    }
+}
+
+@Composable
+private fun ConnectionsSection(
+    connections: List<ConnectedItem>,
+    linkQuery: String,
+    linkResults: List<Item>,
+    onOpenItem: (String) -> Unit,
+    onLinkQueryChange: (String) -> Unit,
+    onAddLink: (String) -> Unit,
+    onRemoveLink: (ConnectedItem) -> Unit,
+) {
+    val colors = SecondBrainTheme.colors
+    val type = SecondBrainTheme.type
+    val space = SecondBrainTheme.spacing
+    var showPicker by remember { mutableStateOf(false) }
+
+    SectionLabel("پیوندها")
+    Spacer(Modifier.height(space.sm))
+
+    if (connections.isEmpty()) {
+        SbText(text = "هنوز پیوندی نیست. این فکر را به چیزهای مرتبط وصل کن.", style = type.body, color = colors.muted)
+    } else {
+        connections.forEach { c ->
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = space.sm),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(modifier = Modifier.weight(1f).clickable { onOpenItem(c.item.id) }) {
+                    SbText(text = c.item.content, style = type.body, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                SbTextButton(label = "×", onClick = { onRemoveLink(c) }, color = colors.muted)
+            }
+            SbHairline()
+        }
+    }
+
+    Spacer(Modifier.height(space.sm))
+    SbTextButton(
+        label = if (showPicker) "بستن" else "+ افزودن پیوند",
+        onClick = { showPicker = !showPicker },
+    )
+
+    if (showPicker) {
+        Spacer(Modifier.height(space.sm))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(SecondBrainTheme.shapes.medium)
+                .background(colors.surface)
+                .padding(horizontal = space.md, vertical = space.md),
+        ) {
+            SbTextField(
+                value = linkQuery,
+                onValueChange = onLinkQueryChange,
+                placeholder = "جستجوی آیتم برای پیوند…",
+                singleLine = true,
+            )
+        }
+        linkResults.take(8).forEach { r ->
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onAddLink(r.id); showPicker = false }
+                    .padding(vertical = space.md),
+            ) {
+                SbText(text = r.content, style = type.body, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+            SbHairline()
+        }
     }
 }
 
