@@ -22,7 +22,7 @@ import ir.dbsgraphic.secondbrain.core.database.entity.Project
  */
 @Database(
     entities = [Item::class, Project::class, ItemLink::class, HabitCheckin::class],
-    version = 5,
+    version = 6,
     exportSchema = true,
 )
 abstract class SecondBrainDatabase : RoomDatabase() {

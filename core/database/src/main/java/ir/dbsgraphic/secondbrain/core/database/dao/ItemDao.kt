@@ -54,6 +54,10 @@ interface ItemDao {
     @Query("SELECT * FROM items WHERE reminderAt IS NOT NULL AND status != 'trashed' ORDER BY reminderAt ASC")
     fun observeReminders(): Flow<List<Item>>
 
+    /** One-shot snapshot of items with a scheduled reminder (for calendar mirroring). */
+    @Query("SELECT * FROM items WHERE reminderAt IS NOT NULL AND status != 'trashed' ORDER BY reminderAt ASC")
+    suspend fun getReminders(): List<Item>
+
     /** The recoverable Trash (Constitution §13). */
     @Query("SELECT * FROM items WHERE status = 'trashed' ORDER BY updatedAt DESC")
     fun observeTrashed(): Flow<List<Item>>

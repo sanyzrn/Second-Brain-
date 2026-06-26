@@ -43,6 +43,7 @@ fun SettingsRoute(
     onOpenAi: () -> Unit,
     onOpenTrash: () -> Unit,
     onOpenData: () -> Unit,
+    onOpenCalendar: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
@@ -53,6 +54,7 @@ fun SettingsRoute(
         onOpenAi = onOpenAi,
         onOpenTrash = onOpenTrash,
         onOpenData = onOpenData,
+        onOpenCalendar = onOpenCalendar,
         onBack = onBack,
     )
 }
@@ -65,6 +67,7 @@ fun SettingsScreen(
     onOpenAi: () -> Unit,
     onOpenTrash: () -> Unit,
     onOpenData: () -> Unit,
+    onOpenCalendar: () -> Unit,
     onBack: () -> Unit,
 ) {
     val colors = SecondBrainTheme.colors
@@ -109,6 +112,8 @@ fun SettingsScreen(
             NavRow(label = "سطل بازیافت", subtitle = "بازگردانی هرچه حذف کرده‌ای", onClick = onOpenTrash)
             SbHairline(modifier = Modifier.padding(horizontal = space.md))
             NavRow(label = "پشتیبان‌گیری و انتقال", subtitle = "برون‌بری و درون‌ریزی رمزگذاری‌شده", onClick = onOpenData)
+            SbHairline(modifier = Modifier.padding(horizontal = space.md))
+            NavRow(label = "تقویم", subtitle = "هم‌گام‌سازی با تقویم دستگاه و فایل ICS", onClick = onOpenCalendar)
         }
 
         Spacer(Modifier.height(space.xl))

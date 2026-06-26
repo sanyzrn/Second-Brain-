@@ -38,4 +38,5 @@ data class Item(
     @ColumnInfo(name = "projectId") val projectId: String? = null,
     val tags: String = "[]",
     val reminderAt: Long? = null,            // epoch millis of a scheduled reminder
+    val calendarEventId: Long? = null,       // device-calendar event id, when mirrored
 )

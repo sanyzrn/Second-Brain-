@@ -13,6 +13,7 @@ import ir.dbsgraphic.secondbrain.feature.reminders.RemindersRoute
 import ir.dbsgraphic.secondbrain.feature.search.SearchRoute
 import ir.dbsgraphic.secondbrain.feature.settings.AboutRoute
 import ir.dbsgraphic.secondbrain.feature.settings.AiSettingsRoute
+import ir.dbsgraphic.secondbrain.feature.settings.CalendarRoute
 import ir.dbsgraphic.secondbrain.feature.settings.DataRoute
 import ir.dbsgraphic.secondbrain.feature.settings.SettingsRoute
 import ir.dbsgraphic.secondbrain.feature.settings.TrashRoute
@@ -28,6 +29,7 @@ object Routes {
     const val AI = "ai_settings"
     const val TRASH = "trash"
     const val DATA = "data"
+    const val CALENDAR = "calendar"
     const val ITEM = "item/{itemId}"
     const val REMINDERS = "reminders"
     fun project(id: String) = "project/$id"
@@ -112,6 +114,7 @@ fun SecondBrainNavHost(
                 onOpenAi = { navController.navigate(Routes.AI) },
                 onOpenTrash = { navController.navigate(Routes.TRASH) },
                 onOpenData = { navController.navigate(Routes.DATA) },
+                onOpenCalendar = { navController.navigate(Routes.CALENDAR) },
             )
         }
 
@@ -129,6 +132,10 @@ fun SecondBrainNavHost(
 
         composable(Routes.DATA) {
             DataRoute(onBack = { navController.popBackStack() })
+        }
+
+        composable(Routes.CALENDAR) {
+            CalendarRoute(onBack = { navController.popBackStack() })
         }
     }
 }

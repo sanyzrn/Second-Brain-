@@ -31,6 +31,25 @@ in **Space Mono** (the "instrument" voice). RTL is the host layout, not a mirror
 - **Offline-first**, no Firebase / no third-party cloud.
 - Custom design system on Compose Foundation; Material used only as a substrate.
 
+## Build status — Phase 15 (Calendar — device sync + ICS)
+
+Calendars, both ways, reached from **Settings → تقویم**:
+
+- **Device calendar** (`CalendarContract`, runtime READ/WRITE_CALENDAR): pick a
+  writable calendar and mirror every item-with-a-reminder into it (create or
+  update — the event id is stored on the Item as `calendarEventId`, DB v6, so
+  re-syncing never duplicates). Upcoming device events are listed read-only and
+  can be pulled into the Inbox with one tap.
+- **ICS** (no permission, fully offline): export all due-dated items to a
+  standard `.ics` (via SAF), and import an `.ics` back as Inbox items with
+  reminders. A small dependency-free `IcsCodec` (RFC 5545: line folding, value
+  escaping, UTC/floating/all-day dates) carries it, with pure-JVM unit tests.
+
+Calendar access is **off until granted** and every call degrades to empty/null,
+so the app is fully usable without it (the §12 spirit: integrations only add).
+Known limits: mirrored events aren't auto-removed when an item is trashed, and
+ICS import doesn't de-duplicate by UID — both are explicit, re-runnable actions.
+
 ## Build status — Phase 14 (Finance — expenses & installments)
 
 Money as a vertical over the one pipeline. A finance entry is an Item
