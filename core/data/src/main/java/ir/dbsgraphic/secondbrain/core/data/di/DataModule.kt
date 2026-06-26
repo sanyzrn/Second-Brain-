@@ -17,6 +17,8 @@ import ir.dbsgraphic.secondbrain.core.data.FinanceRepository
 import ir.dbsgraphic.secondbrain.core.data.FinanceRepositoryImpl
 import ir.dbsgraphic.secondbrain.core.data.HabitRepository
 import ir.dbsgraphic.secondbrain.core.data.HabitRepositoryImpl
+import ir.dbsgraphic.secondbrain.core.data.MedicineRepository
+import ir.dbsgraphic.secondbrain.core.data.MedicineRepositoryImpl
 import ir.dbsgraphic.secondbrain.core.data.ProjectRepository
 import ir.dbsgraphic.secondbrain.core.data.ProjectRepositoryImpl
 import ir.dbsgraphic.secondbrain.core.data.SettingsRepository
@@ -56,6 +58,10 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindCalendarMirror(impl: DeviceCalendarMirror): CalendarMirror
+
+    @Binds
+    @Singleton
+    abstract fun bindMedicineRepository(impl: MedicineRepositoryImpl): MedicineRepository
 
     companion object {
         @Provides

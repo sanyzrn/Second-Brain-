@@ -31,6 +31,20 @@ in **Space Mono** (the "instrument" voice). RTL is the host layout, not a mirror
 - **Offline-first**, no Firebase / no third-party cloud.
 - Custom design system on Compose Foundation; Material used only as a substrate.
 
+## Build status — Phase 16 (Medicine — schedules, doses, refills)
+
+Medicines as a vertical over the one pipeline — and **no schema change**: a
+medicine is an Item (`type=medicine`) whose dosage, daily times and stock live
+in `details` (`MedicineDetails`), whose *next dose* reuses `reminderAt` (so it
+notifies for free), and whose adherence reuses the **Phase 13 cadence engine** —
+each dose taken writes a row in `habit_checkins`, so streaks are the same query
+that powers Habits (§4: one atom, no duplication). A new "داروها" page in the
+home pager lists each medicine with dosage, next-dose time, doses-remaining,
+adherence streak, a one-tap "مصرف کردم", and a refill prompt when stock falls to
+the threshold. Adding picks doses-per-day (۱–۴, mapped to sensible default
+times). `MedicineSchedule.nextDose` (soonest remaining slot today, else tomorrow)
+and the codec are covered by pure-JVM tests.
+
 ## Build status — Phase 15 (Calendar — device sync + ICS)
 
 Calendars, both ways, reached from **Settings → تقویم**:

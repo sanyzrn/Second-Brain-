@@ -68,6 +68,7 @@ dependencies {
     implementation(project(":feature:reminders"))
     implementation(project(":feature:habits"))
     implementation(project(":feature:finance"))
+    implementation(project(":feature:medicine"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)
