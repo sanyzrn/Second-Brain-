@@ -31,6 +31,13 @@ in **Space Mono** (the "instrument" voice). RTL is the host layout, not a mirror
 - **Offline-first**, no Firebase / no third-party cloud.
 - Custom design system on Compose Foundation; Material used only as a substrate.
 
+## Build status — Phase 13 (Habits — first vertical)
+
+Habits are Items (`type=habit`); daily completions live in a `habit_checkins`
+table (DB v5) so streaks are real queries. A new "عادت‌ها" page in the home
+pager lists habits with a check circle and streak; habits open in item detail
+and are backed up like anything else.
+
 ## Build status — Phase 12 (hardening)
 
 API key sealed with the Keystore (no plaintext, §11); Projects ordered by real

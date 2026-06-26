@@ -2,10 +2,12 @@ package ir.dbsgraphic.secondbrain.core.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import ir.dbsgraphic.secondbrain.core.database.dao.HabitCheckinDao
 import ir.dbsgraphic.secondbrain.core.database.dao.ItemDao
 import ir.dbsgraphic.secondbrain.core.database.dao.ItemLinkDao
 import ir.dbsgraphic.secondbrain.core.database.dao.ProjectDao
 import ir.dbsgraphic.secondbrain.core.database.dao.SearchDao
+import ir.dbsgraphic.secondbrain.core.database.entity.HabitCheckin
 import ir.dbsgraphic.secondbrain.core.database.entity.Item
 import ir.dbsgraphic.secondbrain.core.database.entity.ItemLink
 import ir.dbsgraphic.secondbrain.core.database.entity.Project
@@ -19,8 +21,8 @@ import ir.dbsgraphic.secondbrain.core.database.entity.Project
  * the version will bump with reviewable migrations (schemas are exported).
  */
 @Database(
-    entities = [Item::class, Project::class, ItemLink::class],
-    version = 4,
+    entities = [Item::class, Project::class, ItemLink::class, HabitCheckin::class],
+    version = 5,
     exportSchema = true,
 )
 abstract class SecondBrainDatabase : RoomDatabase() {
@@ -28,6 +30,7 @@ abstract class SecondBrainDatabase : RoomDatabase() {
     abstract fun projectDao(): ProjectDao
     abstract fun itemLinkDao(): ItemLinkDao
     abstract fun searchDao(): SearchDao
+    abstract fun habitCheckinDao(): HabitCheckinDao
 
     companion object {
         const val NAME = "second_brain.db"

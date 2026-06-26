@@ -49,3 +49,15 @@ val MIGRATION_3_4 = object : Migration(3, 4) {
         db.execSQL("ALTER TABLE items ADD COLUMN reminderAt INTEGER")
     }
 }
+
+/** v4 → v5: habit check-ins (the Habits vertical). */
+val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `habit_checkins` (" +
+                "`habitId` TEXT NOT NULL, `dayStart` INTEGER NOT NULL, `doneAt` INTEGER NOT NULL, " +
+                "PRIMARY KEY(`habitId`, `dayStart`))",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_habit_checkins_habitId` ON `habit_checkins` (`habitId`)")
+    }
+}
