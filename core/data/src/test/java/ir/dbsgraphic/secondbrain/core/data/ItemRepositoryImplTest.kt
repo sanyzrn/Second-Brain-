@@ -65,6 +65,9 @@ internal class FakeItemDao : ItemDao {
             list.filter { it.reminderAt != null && it.status != "trashed" }.sortedBy { it.reminderAt }
         }
 
+    override suspend fun getReminders(): List<Item> =
+        items.value.filter { it.reminderAt != null && it.status != "trashed" }.sortedBy { it.reminderAt }
+
     override fun observeTrashed(): Flow<List<Item>> =
         items.map { list -> list.filter { it.status == "trashed" }.sortedByDescending { it.updatedAt } }
 

@@ -26,6 +26,8 @@ android {
 dependencies {
     // Expose the database (and the Item model) to feature modules.
     api(project(":core:database"))
+    // Calendar types appear in CalendarRepository's surface, so expose them too.
+    api(project(":core:calendar"))
     implementation(project(":core:security"))
 
     implementation(libs.kotlinx.coroutines.core)
