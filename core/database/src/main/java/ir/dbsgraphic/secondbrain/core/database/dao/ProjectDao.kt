@@ -23,6 +23,10 @@ interface ProjectDao {
     @Query("SELECT COUNT(*) FROM items WHERE projectId = :id AND status != 'trashed'")
     fun observeItemCount(id: String): Flow<Int>
 
+    /** Mark a project as recently active (so the Projects list orders by activity). */
+    @Query("UPDATE projects SET updatedAt = :now WHERE id = :id")
+    suspend fun touch(id: String, now: Long)
+
     @Query("SELECT * FROM projects")
     suspend fun getAll(): List<Project>
 

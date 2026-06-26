@@ -3,6 +3,7 @@ package ir.dbsgraphic.secondbrain.core.data
 import ir.dbsgraphic.secondbrain.core.database.PersianNormalizer
 import ir.dbsgraphic.secondbrain.core.database.dao.ItemDao
 import ir.dbsgraphic.secondbrain.core.database.dao.ItemLinkDao
+import ir.dbsgraphic.secondbrain.core.database.dao.ProjectDao
 import ir.dbsgraphic.secondbrain.core.database.dao.SearchDao
 import ir.dbsgraphic.secondbrain.core.database.entity.Item
 import ir.dbsgraphic.secondbrain.core.database.entity.ItemLink
@@ -15,6 +16,7 @@ class ItemRepositoryImpl @Inject constructor(
     private val itemDao: ItemDao,
     private val itemLinkDao: ItemLinkDao,
     private val searchDao: SearchDao,
+    private val projectDao: ProjectDao,
     private val reminderScheduler: ReminderScheduler,
     private val clock: Clock,
     private val idGenerator: IdGenerator,
@@ -170,15 +172,18 @@ class ItemRepositoryImpl @Inject constructor(
         tags: List<String>,
     ) {
         val item = itemDao.getById(itemId) ?: return
+        val now = clock.now()
         itemDao.update(
             item.copy(
                 type = type,
                 status = "triaged",
                 projectId = projectId,
                 tags = TagsCodec.encode(tags),
-                updatedAt = clock.now(),
+                updatedAt = now,
             ),
         )
+        // Keep the Projects list ordered by activity (§ review fix).
+        if (projectId != null) projectDao.touch(projectId, now)
     }
 
     override fun observeBacklinks(itemId: String): Flow<List<Item>> =

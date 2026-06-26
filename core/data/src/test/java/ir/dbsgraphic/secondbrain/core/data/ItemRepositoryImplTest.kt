@@ -2,9 +2,11 @@ package ir.dbsgraphic.secondbrain.core.data
 
 import ir.dbsgraphic.secondbrain.core.database.dao.ItemDao
 import ir.dbsgraphic.secondbrain.core.database.dao.ItemLinkDao
+import ir.dbsgraphic.secondbrain.core.database.dao.ProjectDao
 import ir.dbsgraphic.secondbrain.core.database.dao.SearchDao
 import ir.dbsgraphic.secondbrain.core.database.entity.Item
 import ir.dbsgraphic.secondbrain.core.database.entity.ItemLink
+import ir.dbsgraphic.secondbrain.core.database.entity.Project
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -100,16 +102,35 @@ internal class FakeSearchDao : SearchDao {
     override fun search(matchQuery: String, limit: Int): Flow<List<Item>> = flowOf(emptyList())
 }
 
+internal class FakeProjectDao : ProjectDao {
+    val projects = MutableStateFlow<List<Project>>(emptyList())
+    override suspend fun upsert(project: Project) {
+        projects.value = projects.value.filterNot { it.id == project.id } + project
+    }
+    override fun observeActive(): Flow<List<Project>> =
+        projects.map { list -> list.filter { it.status == "active" } }
+    override fun observeById(id: String): Flow<Project?> =
+        projects.map { list -> list.find { it.id == id } }
+    override fun observeItemCount(id: String): Flow<Int> = flowOf(0)
+    override suspend fun touch(id: String, now: Long) {
+        projects.value = projects.value.map { if (it.id == id) it.copy(updatedAt = now) else it }
+    }
+    override suspend fun getAll(): List<Project> = projects.value
+    override suspend fun upsertAll(list: List<Project>) = list.forEach { upsert(it) }
+}
+
 class ItemRepositoryImplTest {
 
     private val dao = FakeItemDao()
     private val linkDao = FakeItemLinkDao(dao)
     private val searchDao = FakeSearchDao()
     private var counter = 0
+    private val projectDao = FakeProjectDao()
     private val repo = ItemRepositoryImpl(
         itemDao = dao,
         itemLinkDao = linkDao,
         searchDao = searchDao,
+        projectDao = projectDao,
         reminderScheduler = NoOpReminderScheduler,
         clock = { 1_000L },
         idGenerator = { "id-${++counter}" },

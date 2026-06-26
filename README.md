@@ -31,6 +31,14 @@ in **Space Mono** (the "instrument" voice). RTL is the host layout, not a mirror
 - **Offline-first**, no Firebase / no third-party cloud.
 - Custom design system on Compose Foundation; Material used only as a substrate.
 
+## Build status — Phase 12 (hardening)
+
+API key sealed with the Keystore (no plaintext, §11); Projects ordered by real
+activity (`Project.updatedAt` bumped on triage); status/nav-bar icon contrast
+follows the resolved theme; pure-JVM tests for `PersianNormalizer` and
+`TagsCodec`. (Snackbar-Undo, Paging 3, and portable backup are noted as
+follow-ups; deletions are already recoverable via Trash.)
+
 ## Build status — Phase 7 (signature & polish)
 
 The Timeline signature realized: "today" is emphasized on the spine, rows

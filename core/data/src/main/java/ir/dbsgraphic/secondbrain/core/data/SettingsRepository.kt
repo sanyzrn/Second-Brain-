@@ -1,6 +1,7 @@
 package ir.dbsgraphic.secondbrain.core.data
 
 import android.content.Context
+import android.util.Base64
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -8,6 +9,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
+import ir.dbsgraphic.secondbrain.core.security.KeystoreCipher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -54,6 +56,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 @Singleton
 class SettingsRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val keystoreCipher: KeystoreCipher,
 ) : SettingsRepository {
 
     private val themeKey = stringPreferencesKey("theme_mode")
@@ -89,7 +92,7 @@ class SettingsRepositoryImpl @Inject constructor(
         AiConfig(
             enabled = prefs[aiEnabledKey] ?: false,
             baseUrl = prefs[aiBaseUrlKey] ?: defaults.baseUrl,
-            apiKey = prefs[aiApiKeyKey] ?: "",
+            apiKey = decryptApiKey(prefs[aiApiKeyKey]),
             chatModel = prefs[aiChatModelKey] ?: defaults.chatModel,
             transcribeModel = prefs[aiTranscribeModelKey] ?: defaults.transcribeModel,
         )
@@ -107,9 +110,23 @@ class SettingsRepositoryImpl @Inject constructor(
     ) {
         context.dataStore.edit {
             it[aiBaseUrlKey] = baseUrl.trim()
-            it[aiApiKeyKey] = apiKey.trim()
+            it[aiApiKeyKey] = encryptApiKey(apiKey.trim())
             it[aiChatModelKey] = chatModel.trim()
             it[aiTranscribeModelKey] = transcribeModel.trim()
         }
     }
+
+    // The API key is a personal secret — sealed with a Keystore key, never
+    // stored in plaintext (Constitution §11).
+    private fun encryptApiKey(plain: String): String =
+        if (plain.isEmpty()) "" else Base64.encodeToString(keystoreCipher.encrypt(plain.toByteArray()), Base64.NO_WRAP)
+
+    private fun decryptApiKey(stored: String?): String =
+        if (stored.isNullOrEmpty()) {
+            ""
+        } else {
+            runCatching {
+                keystoreCipher.decrypt(Base64.decode(stored, Base64.NO_WRAP)).decodeToString()
+            }.getOrDefault("")
+        }
 }
