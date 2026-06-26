@@ -18,6 +18,7 @@ class ItemRepositoryImpl @Inject constructor(
     private val searchDao: SearchDao,
     private val projectDao: ProjectDao,
     private val reminderScheduler: ReminderScheduler,
+    private val calendarMirror: CalendarMirror,
     private val clock: Clock,
     private val idGenerator: IdGenerator,
 ) : ItemRepository {
@@ -37,12 +38,22 @@ class ItemRepositoryImpl @Inject constructor(
 
     override suspend fun setReminder(id: String, whenMillis: Long?) {
         val item = itemDao.getById(id) ?: return
-        itemDao.update(item.copy(reminderAt = whenMillis, updatedAt = clock.now()))
+        // Clearing a reminder also removes any mirrored calendar event (the
+        // event represented that due date — re-mirror recreates it).
+        val clearedEventId = if (whenMillis == null) item.calendarEventId else null
+        itemDao.update(
+            item.copy(
+                reminderAt = whenMillis,
+                calendarEventId = if (whenMillis == null) null else item.calendarEventId,
+                updatedAt = clock.now(),
+            ),
+        )
         if (whenMillis != null && whenMillis > clock.now()) {
             reminderScheduler.schedule(id, item.content, whenMillis)
         } else {
             reminderScheduler.cancel(id)
         }
+        clearedEventId?.let { calendarMirror.remove(it) }
     }
 
     override fun observeTrash(): Flow<List<Item>> = itemDao.observeTrashed()
@@ -50,7 +61,10 @@ class ItemRepositoryImpl @Inject constructor(
     override suspend fun trash(id: String) {
         val item = itemDao.getById(id) ?: return
         reminderScheduler.cancel(id)
-        itemDao.update(item.copy(status = "trashed", updatedAt = clock.now()))
+        // A trashed item shouldn't linger on the calendar; drop the mirrored
+        // event and clear the link so a later restore + re-mirror starts clean.
+        item.calendarEventId?.let { calendarMirror.remove(it) }
+        itemDao.update(item.copy(status = "trashed", calendarEventId = null, updatedAt = clock.now()))
     }
 
     override suspend fun restore(id: String) {
@@ -62,6 +76,7 @@ class ItemRepositoryImpl @Inject constructor(
     override suspend fun deleteForever(id: String) {
         val item = itemDao.getById(id) ?: return
         reminderScheduler.cancel(id)
+        item.calendarEventId?.let { calendarMirror.remove(it) }
         deleteBlob(item.blobRef)
         itemDao.deleteById(id)
     }
@@ -69,6 +84,7 @@ class ItemRepositoryImpl @Inject constructor(
     override suspend fun emptyTrash() {
         itemDao.observeTrashed().first().forEach {
             reminderScheduler.cancel(it.id)
+            it.calendarEventId?.let { eventId -> calendarMirror.remove(eventId) }
             deleteBlob(it.blobRef)
         }
         itemDao.deleteAllTrashed()

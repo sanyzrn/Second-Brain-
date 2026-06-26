@@ -146,6 +146,7 @@ class ItemRepositoryImplTest {
         searchDao = searchDao,
         projectDao = projectDao,
         reminderScheduler = NoOpReminderScheduler,
+        calendarMirror = NoOpCalendarMirror,
         clock = { 1_000L },
         idGenerator = { "id-${++counter}" },
     )
