@@ -3,6 +3,8 @@
 
     <!-- Voice capture. Camera uses the system camera app, so no CAMERA permission. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- Reminder notifications (requested at runtime on Android 13+). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".SecondBrainApplication"

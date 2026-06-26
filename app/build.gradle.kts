@@ -57,6 +57,7 @@ dependencies {
     implementation(project(":core:database"))
     implementation(project(":core:security"))
     implementation(project(":core:ai"))
+    implementation(project(":core:reminders"))
     implementation(project(":feature:inbox"))
     implementation(project(":feature:itemdetail"))
     implementation(project(":feature:project"))
@@ -64,6 +65,7 @@ dependencies {
     implementation(project(":feature:search"))
     implementation(project(":feature:settings"))
     implementation(project(":feature:onboarding"))
+    implementation(project(":feature:reminders"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)

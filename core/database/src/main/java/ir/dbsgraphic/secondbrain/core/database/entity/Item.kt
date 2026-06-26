@@ -37,4 +37,5 @@ data class Item(
     val details: String? = null,              // JSON for type-specific fields
     @ColumnInfo(name = "projectId") val projectId: String? = null,
     val tags: String = "[]",
+    val reminderAt: Long? = null,            // epoch millis of a scheduled reminder
 )

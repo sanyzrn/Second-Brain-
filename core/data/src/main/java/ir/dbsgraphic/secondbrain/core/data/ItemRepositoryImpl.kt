@@ -15,6 +15,7 @@ class ItemRepositoryImpl @Inject constructor(
     private val itemDao: ItemDao,
     private val itemLinkDao: ItemLinkDao,
     private val searchDao: SearchDao,
+    private val reminderScheduler: ReminderScheduler,
     private val clock: Clock,
     private val idGenerator: IdGenerator,
 ) : ItemRepository {
@@ -30,10 +31,23 @@ class ItemRepositoryImpl @Inject constructor(
         itemDao.update(item.copy(content = trimmed, updatedAt = clock.now()))
     }
 
+    override fun observeReminders(): Flow<List<Item>> = itemDao.observeReminders()
+
+    override suspend fun setReminder(id: String, whenMillis: Long?) {
+        val item = itemDao.getById(id) ?: return
+        itemDao.update(item.copy(reminderAt = whenMillis, updatedAt = clock.now()))
+        if (whenMillis != null && whenMillis > clock.now()) {
+            reminderScheduler.schedule(id, item.content, whenMillis)
+        } else {
+            reminderScheduler.cancel(id)
+        }
+    }
+
     override fun observeTrash(): Flow<List<Item>> = itemDao.observeTrashed()
 
     override suspend fun trash(id: String) {
         val item = itemDao.getById(id) ?: return
+        reminderScheduler.cancel(id)
         itemDao.update(item.copy(status = "trashed", updatedAt = clock.now()))
     }
 
@@ -45,12 +59,16 @@ class ItemRepositoryImpl @Inject constructor(
 
     override suspend fun deleteForever(id: String) {
         val item = itemDao.getById(id) ?: return
+        reminderScheduler.cancel(id)
         deleteBlob(item.blobRef)
         itemDao.deleteById(id)
     }
 
     override suspend fun emptyTrash() {
-        itemDao.observeTrashed().first().forEach { deleteBlob(it.blobRef) }
+        itemDao.observeTrashed().first().forEach {
+            reminderScheduler.cancel(it.id)
+            deleteBlob(it.blobRef)
+        }
         itemDao.deleteAllTrashed()
     }
 

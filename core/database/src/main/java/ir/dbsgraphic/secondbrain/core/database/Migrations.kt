@@ -42,3 +42,10 @@ val MIGRATION_2_3 = object : Migration(2, 3) {
         FtsSchema.backfillMissing(db)
     }
 }
+
+/** v3 → v4: a scheduled reminder time on Items. No data touched (§9). */
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE items ADD COLUMN reminderAt INTEGER")
+    }
+}

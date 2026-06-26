@@ -9,6 +9,7 @@ import androidx.navigation.navArgument
 import ir.dbsgraphic.secondbrain.feature.itemdetail.ItemDetailRoute
 import ir.dbsgraphic.secondbrain.feature.onboarding.OnboardingRoute
 import ir.dbsgraphic.secondbrain.feature.project.ProjectRoute
+import ir.dbsgraphic.secondbrain.feature.reminders.RemindersRoute
 import ir.dbsgraphic.secondbrain.feature.search.SearchRoute
 import ir.dbsgraphic.secondbrain.feature.settings.AboutRoute
 import ir.dbsgraphic.secondbrain.feature.settings.AiSettingsRoute
@@ -28,6 +29,7 @@ object Routes {
     const val TRASH = "trash"
     const val DATA = "data"
     const val ITEM = "item/{itemId}"
+    const val REMINDERS = "reminders"
     fun project(id: String) = "project/$id"
     fun item(id: String) = "item/$id"
 }
@@ -64,6 +66,7 @@ fun SecondBrainNavHost(
                 onOpenProject = { id -> navController.navigate(Routes.project(id)) },
                 onOpenItem = { id -> navController.navigate(Routes.item(id)) },
                 onOpenSearch = { navController.navigate(Routes.SEARCH) },
+                onOpenReminders = { navController.navigate(Routes.REMINDERS) },
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
             )
         }
@@ -90,6 +93,13 @@ fun SecondBrainNavHost(
 
         composable(Routes.SEARCH) {
             SearchRoute(
+                onBack = { navController.popBackStack() },
+                onOpenItem = { id -> navController.navigate(Routes.item(id)) },
+            )
+        }
+
+        composable(Routes.REMINDERS) {
+            RemindersRoute(
                 onBack = { navController.popBackStack() },
                 onOpenItem = { id -> navController.navigate(Routes.item(id)) },
             )

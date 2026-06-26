@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "ir.dbsgraphic.secondbrain.feature.itemdetail"
+    namespace = "ir.dbsgraphic.secondbrain.feature.reminders"
     compileSdk = 35
     defaultConfig { minSdk = 24 }
     compileOptions {
@@ -21,7 +21,6 @@ android {
 dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":core:data"))
-    implementation(project(":core:ai"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)

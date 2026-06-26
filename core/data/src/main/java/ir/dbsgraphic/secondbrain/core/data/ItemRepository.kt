@@ -46,6 +46,14 @@ interface ItemRepository {
     /** Replace an item's text — used by AI enrichment (transcription, OCR). */
     suspend fun updateContent(id: String, content: String)
 
+    // ── Reminders (§19: peace of mind — nothing slips) ──────────────────────
+
+    /** Items with a scheduled reminder, soonest first. */
+    fun observeReminders(): Flow<List<Item>>
+
+    /** Set or clear an item's reminder; schedules/cancels the notification. */
+    suspend fun setReminder(id: String, whenMillis: Long?)
+
     // ── Trash: nothing is ever lost (Constitution §13) ──────────────────────
 
     /** Items currently in the Trash. */

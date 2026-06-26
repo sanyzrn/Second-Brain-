@@ -53,6 +53,7 @@ fun MainShell(
     onOpenProject: (String) -> Unit,
     onOpenItem: (String) -> Unit,
     onOpenSearch: () -> Unit,
+    onOpenReminders: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
     val colors = SecondBrainTheme.colors
@@ -99,6 +100,8 @@ fun MainShell(
             SbText(text = "مغز دوم", style = type.title)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 SbIconButton(icon = DsR.drawable.ic_search, contentDescription = "جستجو", onClick = onOpenSearch)
+                Spacer(Modifier.width(space.xs))
+                SbIconButton(icon = DsR.drawable.ic_bell, contentDescription = "یادآوری‌ها", onClick = onOpenReminders)
                 Spacer(Modifier.width(space.xs))
                 SbIconButton(icon = DsR.drawable.ic_settings, contentDescription = "تنظیمات", onClick = onOpenSettings)
             }

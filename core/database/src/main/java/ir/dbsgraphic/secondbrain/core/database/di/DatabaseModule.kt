@@ -12,6 +12,7 @@ import dagger.hilt.components.SingletonComponent
 import ir.dbsgraphic.secondbrain.core.database.FtsSchema
 import ir.dbsgraphic.secondbrain.core.database.MIGRATION_1_2
 import ir.dbsgraphic.secondbrain.core.database.MIGRATION_2_3
+import ir.dbsgraphic.secondbrain.core.database.MIGRATION_3_4
 import ir.dbsgraphic.secondbrain.core.database.SecondBrainDatabase
 import ir.dbsgraphic.secondbrain.core.database.dao.ItemDao
 import ir.dbsgraphic.secondbrain.core.database.dao.ItemLinkDao
@@ -42,7 +43,7 @@ object DatabaseModule {
             SecondBrainDatabase.NAME,
         )
             .openHelperFactory(factory)
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
             // The FTS5 table isn't a Room @Entity, so migrations alone miss the
             // fresh-install path. Create it on open (idempotent) and backfill any
             // items missing from the index — this also repairs older databases.

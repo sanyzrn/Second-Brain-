@@ -47,6 +47,11 @@ internal class FakeItemDao : ItemDao {
     override fun observeInboxCount(): Flow<Int> =
         items.map { list -> list.count { it.status == "inbox" } }
 
+    override fun observeReminders(): Flow<List<Item>> =
+        items.map { list ->
+            list.filter { it.reminderAt != null && it.status != "trashed" }.sortedBy { it.reminderAt }
+        }
+
     override fun observeTrashed(): Flow<List<Item>> =
         items.map { list -> list.filter { it.status == "trashed" }.sortedByDescending { it.updatedAt } }
 
@@ -105,6 +110,7 @@ class ItemRepositoryImplTest {
         itemDao = dao,
         itemLinkDao = linkDao,
         searchDao = searchDao,
+        reminderScheduler = NoOpReminderScheduler,
         clock = { 1_000L },
         idGenerator = { "id-${++counter}" },
     )

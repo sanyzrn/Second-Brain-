@@ -42,6 +42,10 @@ interface ItemDao {
     @Query("SELECT COUNT(*) FROM items WHERE status = 'inbox'")
     fun observeInboxCount(): Flow<Int>
 
+    /** Items with a scheduled reminder, soonest first. */
+    @Query("SELECT * FROM items WHERE reminderAt IS NOT NULL AND status != 'trashed' ORDER BY reminderAt ASC")
+    fun observeReminders(): Flow<List<Item>>
+
     /** The recoverable Trash (Constitution §13). */
     @Query("SELECT * FROM items WHERE status = 'trashed' ORDER BY updatedAt DESC")
     fun observeTrashed(): Flow<List<Item>>

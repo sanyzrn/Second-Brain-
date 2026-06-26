@@ -61,7 +61,12 @@ fun ItemDetailRoute(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val linkQuery by viewModel.linkQuery.collectAsStateWithLifecycle()
     val linkResults by viewModel.linkResults.collectAsStateWithLifecycle()
+    val reminderSuggestion by viewModel.reminderSuggestion.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
+    LaunchedEffect(state.item?.id) {
+        state.item?.let { viewModel.loadReminderSuggestion(it.content) }
+    }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
@@ -79,6 +84,7 @@ fun ItemDetailRoute(
         state = state,
         linkQuery = linkQuery,
         linkResults = linkResults,
+        reminderSuggestion = reminderSuggestion,
         onSave = viewModel::save,
         onTrash = viewModel::trash,
         onRestore = viewModel::restore,
@@ -87,6 +93,7 @@ fun ItemDetailRoute(
         onLinkQueryChange = viewModel::onLinkQueryChange,
         onAddLink = viewModel::addLink,
         onRemoveLink = viewModel::removeLink,
+        onSetReminder = viewModel::setReminder,
         onBack = onBack,
     )
 }
@@ -96,6 +103,7 @@ fun ItemDetailScreen(
     state: ItemDetailUiState,
     linkQuery: String,
     linkResults: List<Item>,
+    reminderSuggestion: Long?,
     onSave: (String, ItemType?, String?, List<String>) -> Unit,
     onTrash: () -> Unit,
     onRestore: () -> Unit,
@@ -104,6 +112,7 @@ fun ItemDetailScreen(
     onLinkQueryChange: (String) -> Unit,
     onAddLink: (String) -> Unit,
     onRemoveLink: (ConnectedItem) -> Unit,
+    onSetReminder: (Long?) -> Unit,
     onBack: () -> Unit,
 ) {
     val colors = SecondBrainTheme.colors
@@ -251,6 +260,13 @@ fun ItemDetailScreen(
                     }
                 }
             }
+
+            Spacer(Modifier.height(space.lg))
+            ReminderSection(
+                reminderAt = item.reminderAt,
+                suggestionMs = reminderSuggestion,
+                onSet = onSetReminder,
+            )
         }
 
         // ── Connections (§5) ────────────────────────────────────────────────
@@ -408,6 +424,64 @@ private fun ConnectionsSection(
             SbHairline()
         }
     }
+}
+
+@Composable
+private fun ReminderSection(reminderAt: Long?, suggestionMs: Long?, onSet: (Long?) -> Unit) {
+    val colors = SecondBrainTheme.colors
+    val type = SecondBrainTheme.type
+    val space = SecondBrainTheme.spacing
+
+    SectionLabel("یادآوری")
+    Spacer(Modifier.height(space.sm))
+
+    if (reminderAt != null) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            SbText(
+                text = reminderTextFa(reminderAt),
+                style = type.body,
+                color = colors.accent,
+                modifier = Modifier.weight(1f),
+            )
+            SbTextButton(label = "حذف یادآوری", onClick = { onSet(null) }, color = colors.muted)
+        }
+    } else {
+        val now = System.currentTimeMillis()
+        ChipRow {
+            SbChip(label = "۱ ساعت دیگر", selected = false, onClick = { onSet(now + 3_600_000L) })
+            SbChip(label = "امشب", selected = false, onClick = { onSet(presetAt(20, 0)) })
+            SbChip(label = "فردا صبح", selected = false, onClick = { onSet(presetAt(9, 0, tomorrow = true)) })
+            SbChip(label = "هفته‌ی بعد", selected = false, onClick = { onSet(now + 7L * 24 * 3_600_000L) })
+        }
+        if (suggestionMs != null && suggestionMs > now) {
+            Spacer(Modifier.height(space.sm))
+            ChipRow {
+                SbChip(
+                    label = "پیشنهاد دستیار: ${reminderTextFa(suggestionMs)}",
+                    selected = false,
+                    onClick = { onSet(suggestionMs) },
+                )
+            }
+        }
+    }
+}
+
+private fun reminderTextFa(ms: Long): String =
+    "${JalaliDate.formatDate(ms)} · ${JalaliDate.formatTime(ms)}"
+
+/** A preset clock time today (or tomorrow); rolls forward if already past. */
+private fun presetAt(hour: Int, minute: Int, tomorrow: Boolean = false): Long {
+    val cal = java.util.Calendar.getInstance().apply {
+        set(java.util.Calendar.HOUR_OF_DAY, hour)
+        set(java.util.Calendar.MINUTE, minute)
+        set(java.util.Calendar.SECOND, 0)
+        set(java.util.Calendar.MILLISECOND, 0)
+        if (tomorrow) add(java.util.Calendar.DAY_OF_YEAR, 1)
+    }
+    if (cal.timeInMillis <= System.currentTimeMillis()) {
+        cal.add(java.util.Calendar.DAY_OF_YEAR, 1)
+    }
+    return cal.timeInMillis
 }
 
 private fun capturedViaFa(v: String): String = when (v) {

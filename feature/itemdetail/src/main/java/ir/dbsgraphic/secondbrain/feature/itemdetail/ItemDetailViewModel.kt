@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import ir.dbsgraphic.secondbrain.core.ai.AIProvider
 import ir.dbsgraphic.secondbrain.core.data.ItemRepository
 import ir.dbsgraphic.secondbrain.core.data.ItemType
 import ir.dbsgraphic.secondbrain.core.data.ProjectRepository
@@ -50,6 +51,7 @@ class ItemDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val itemRepository: ItemRepository,
     projectRepository: ProjectRepository,
+    private val aiProvider: AIProvider,
 ) : ViewModel() {
 
     private val itemId: String = checkNotNull(savedStateHandle["itemId"])
@@ -80,6 +82,24 @@ class ItemDetailViewModel @Inject constructor(
         .flatMapLatest { q -> itemRepository.search(q) }
         .map { results -> results.filter { it.id != itemId } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    // ── Reminders ───────────────────────────────────────────────────────────
+    private val _reminderSuggestion = MutableStateFlow<Long?>(null)
+    val reminderSuggestion: StateFlow<Long?> = _reminderSuggestion.asStateFlow()
+
+    fun setReminder(whenMillis: Long?) {
+        viewModelScope.launch {
+            runCatching { itemRepository.setReminder(itemId, whenMillis) }
+                .onSuccess { _events.send(DetailEvent.Saved) }
+        }
+    }
+
+    /** Ask AI for a reminder time (null when AI is off / nothing relevant). */
+    fun loadReminderSuggestion(content: String) {
+        viewModelScope.launch {
+            _reminderSuggestion.value = aiProvider.suggestReminder(content)?.whenMillis
+        }
+    }
 
     fun onLinkQueryChange(value: String) {
         _linkQuery.value = value
