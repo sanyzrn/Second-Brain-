@@ -82,7 +82,10 @@ fun SecondBrainNavHost(
             route = Routes.ITEM,
             arguments = listOf(navArgument("itemId") { type = NavType.StringType }),
         ) {
-            ItemDetailRoute(onBack = { navController.popBackStack() })
+            ItemDetailRoute(
+                onBack = { navController.popBackStack() },
+                onOpenItem = { id -> navController.navigate(Routes.item(id)) },
+            )
         }
 
         composable(Routes.SEARCH) {
