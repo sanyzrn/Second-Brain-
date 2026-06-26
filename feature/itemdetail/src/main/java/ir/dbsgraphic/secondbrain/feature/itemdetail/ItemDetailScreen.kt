@@ -27,17 +27,24 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ir.dbsgraphic.secondbrain.core.data.ItemType
 import ir.dbsgraphic.secondbrain.core.data.TagsCodec
 import ir.dbsgraphic.secondbrain.core.database.entity.Item
 import ir.dbsgraphic.secondbrain.core.database.entity.Project
+import ir.dbsgraphic.secondbrain.core.designsystem.component.SbAudioPlayer
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbCard
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbChip
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbHairline
+import ir.dbsgraphic.secondbrain.core.designsystem.component.SbImage
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbPrimaryButton
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbText
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbTextButton
@@ -133,6 +140,7 @@ fun ItemDetailScreen(
         var selectedProjectId by remember(item.id) { mutableStateOf(item.projectId) }
         var tags by remember(item.id) { mutableStateOf(TagsCodec.decode(item.tags)) }
         var tagDraft by remember(item.id) { mutableStateOf("") }
+        var viewerOpen by remember(item.id) { mutableStateOf(false) }
 
         // ── Content ────────────────────────────────────────────────────────
         Box(
@@ -148,6 +156,44 @@ fun ItemDetailScreen(
                 placeholder = "متن…",
                 textStyle = type.bodyLarge,
             )
+        }
+
+        // ── Media (image / voice) ───────────────────────────────────────────
+        val blob = item.blobRef
+        if (!blob.isNullOrBlank()) {
+            Spacer(Modifier.height(space.lg))
+            when (item.contentType) {
+                "image" -> SbImage(
+                    path = blob,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(220.dp)
+                        .clip(SecondBrainTheme.shapes.medium)
+                        .clickable { viewerOpen = true },
+                )
+                "voice" -> SbAudioPlayer(path = blob)
+            }
+        }
+
+        if (viewerOpen && !blob.isNullOrBlank()) {
+            Dialog(
+                onDismissRequest = { viewerOpen = false },
+                properties = DialogProperties(usePlatformDefaultWidth = false),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.92f))
+                        .clickable { viewerOpen = false },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    SbImage(
+                        path = blob,
+                        modifier = Modifier.fillMaxWidth(),
+                        contentScale = ContentScale.Fit,
+                    )
+                }
+            }
         }
 
         if (!trashed) {

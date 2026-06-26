@@ -42,8 +42,10 @@ import ir.dbsgraphic.secondbrain.core.designsystem.R as DsR
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbCard
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbChip
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbHairline
+import ir.dbsgraphic.secondbrain.core.designsystem.component.SbMediaThumb
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbText
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbTextButton
+import ir.dbsgraphic.secondbrain.core.designsystem.component.hasThumb
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbTextField
 import ir.dbsgraphic.secondbrain.core.designsystem.theme.SecondBrainTheme
 import ir.dbsgraphic.secondbrain.core.designsystem.util.toPersianDigits
@@ -266,15 +268,22 @@ private fun ResultRow(item: Item, onClick: () -> Unit) {
     val colors = SecondBrainTheme.colors
     val type = SecondBrainTheme.type
     val space = SecondBrainTheme.spacing
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(vertical = space.lg),
+        verticalAlignment = Alignment.Top,
     ) {
-        SbText(text = item.content, style = type.bodyLarge, maxLines = 2, overflow = TextOverflow.Ellipsis)
-        Spacer(Modifier.height(space.xs))
-        SbText(text = typeLabelFa(item.type), style = type.monoSmall, color = colors.accentSecondary)
+        if (hasThumb(item.contentType)) {
+            SbMediaThumb(contentType = item.contentType, blobRef = item.blobRef)
+            Spacer(Modifier.width(space.md))
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            SbText(text = item.content, style = type.bodyLarge, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Spacer(Modifier.height(space.xs))
+            SbText(text = typeLabelFa(item.type), style = type.monoSmall, color = colors.accentSecondary)
+        }
     }
 }
 

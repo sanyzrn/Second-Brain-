@@ -31,7 +31,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ir.dbsgraphic.secondbrain.core.database.entity.Item
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbChip
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbHairline
+import ir.dbsgraphic.secondbrain.core.designsystem.component.SbMediaThumb
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbText
+import ir.dbsgraphic.secondbrain.core.designsystem.component.hasThumb
 import ir.dbsgraphic.secondbrain.core.designsystem.theme.SecondBrainTheme
 import ir.dbsgraphic.secondbrain.core.designsystem.util.relativeTimeFa
 import ir.dbsgraphic.secondbrain.core.designsystem.util.toPersianDigits
@@ -137,22 +139,29 @@ private fun ProjectItemRow(item: Item, onClick: () -> Unit, onLongPress: () -> U
     val colors = SecondBrainTheme.colors
     val type = SecondBrainTheme.type
     val space = SecondBrainTheme.spacing
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .combinedClickable(onClick = onClick, onLongClick = onLongPress)
             .padding(vertical = space.lg),
+        verticalAlignment = Alignment.Top,
     ) {
-        SbText(text = item.content, style = type.bodyLarge, maxLines = 3, overflow = TextOverflow.Ellipsis)
-        Spacer(Modifier.height(space.sm))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            SbText(text = typeLabelFa(item.type), style = type.monoSmall, color = colors.accent)
-            Spacer(Modifier.width(space.sm))
-            SbText(
-                text = relativeTimeFa(item.createdAt),
-                style = type.monoSmall,
-                color = colors.muted,
-            )
+        if (hasThumb(item.contentType)) {
+            SbMediaThumb(contentType = item.contentType, blobRef = item.blobRef)
+            Spacer(Modifier.width(space.md))
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            SbText(text = item.content, style = type.bodyLarge, maxLines = 3, overflow = TextOverflow.Ellipsis)
+            Spacer(Modifier.height(space.sm))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                SbText(text = typeLabelFa(item.type), style = type.monoSmall, color = colors.accent)
+                Spacer(Modifier.width(space.sm))
+                SbText(
+                    text = relativeTimeFa(item.createdAt),
+                    style = type.monoSmall,
+                    color = colors.muted,
+                )
+            }
         }
     }
 }

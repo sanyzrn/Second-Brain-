@@ -52,6 +52,8 @@ import ir.dbsgraphic.secondbrain.core.database.entity.Item
 import ir.dbsgraphic.secondbrain.core.designsystem.R as DsR
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbHairline
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbIconButton
+import ir.dbsgraphic.secondbrain.core.designsystem.component.SbMediaThumb
+import ir.dbsgraphic.secondbrain.core.designsystem.component.hasThumb
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbText
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbTextField
 import ir.dbsgraphic.secondbrain.core.designsystem.theme.SecondBrainTheme
@@ -237,32 +239,39 @@ private fun InboxItemRow(
     val type = SecondBrainTheme.type
     val space = SecondBrainTheme.spacing
 
-    Column(
+    Row(
         modifier = modifier
             .fillMaxWidth()
             .combinedClickable(onClick = onClick, onLongClick = onLongClick)
             .padding(vertical = space.lg),
+        verticalAlignment = Alignment.Top,
     ) {
-        SbText(
-            text = item.content,
-            style = type.bodyLarge,
-            modifier = Modifier.fillMaxWidth(),
-            maxLines = 3,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Spacer(Modifier.height(space.sm))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            SbText(text = relativeTimeFa(item.createdAt), style = type.monoSmall, color = colors.muted)
-            Spacer(Modifier.width(space.sm))
-            Box(
-                Modifier
-                    .height(4.dp)
-                    .width(4.dp)
-                    .clip(CircleShape)
-                    .background(colors.muted),
+        if (hasThumb(item.contentType)) {
+            SbMediaThumb(contentType = item.contentType, blobRef = item.blobRef)
+            Spacer(Modifier.width(space.md))
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            SbText(
+                text = item.content,
+                style = type.bodyLarge,
+                modifier = Modifier.fillMaxWidth(),
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
             )
-            Spacer(Modifier.width(space.sm))
-            SbText(text = "ثبت‌نشده", style = type.monoSmall, color = colors.muted)
+            Spacer(Modifier.height(space.sm))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                SbText(text = relativeTimeFa(item.createdAt), style = type.monoSmall, color = colors.muted)
+                Spacer(Modifier.width(space.sm))
+                Box(
+                    Modifier
+                        .height(4.dp)
+                        .width(4.dp)
+                        .clip(CircleShape)
+                        .background(colors.muted),
+                )
+                Spacer(Modifier.width(space.sm))
+                SbText(text = "ثبت‌نشده", style = type.monoSmall, color = colors.muted)
+            }
         }
     }
 }

@@ -38,7 +38,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ir.dbsgraphic.secondbrain.core.database.entity.Item
+import ir.dbsgraphic.secondbrain.core.designsystem.component.SbMediaThumb
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbText
+import ir.dbsgraphic.secondbrain.core.designsystem.component.hasThumb
 import ir.dbsgraphic.secondbrain.core.designsystem.theme.SecondBrainTheme
 import ir.dbsgraphic.secondbrain.core.designsystem.util.JalaliDate
 import ir.dbsgraphic.secondbrain.core.designsystem.util.rememberReducedMotion
@@ -171,6 +173,10 @@ private fun EntryRow(
     ) {
         Spine(big = false)
         Column(modifier = Modifier.padding(start = space.md, top = space.sm, bottom = space.lg)) {
+            if (hasThumb(item.contentType)) {
+                SbMediaThumb(contentType = item.contentType, blobRef = item.blobRef, size = 64.dp)
+                Spacer(Modifier.height(space.sm))
+            }
             SbText(text = item.content, style = type.bodyLarge, maxLines = 3, overflow = TextOverflow.Ellipsis)
             Spacer(Modifier.height(space.xs))
             Row(verticalAlignment = Alignment.CenterVertically) {

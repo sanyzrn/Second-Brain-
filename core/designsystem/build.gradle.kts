@@ -31,4 +31,7 @@ dependencies {
     api(libs.androidx.foundation)
     api(libs.androidx.ui.tooling.preview)
     debugImplementation(libs.androidx.ui.tooling)
+
+    api(libs.coil.compose)
+    implementation(libs.kotlinx.coroutines.android)
 }
