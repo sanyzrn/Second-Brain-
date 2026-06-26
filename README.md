@@ -31,6 +31,19 @@ in **Space Mono** (the "instrument" voice). RTL is the host layout, not a mirror
 - **Offline-first**, no Firebase / no third-party cloud.
 - Custom design system on Compose Foundation; Material used only as a substrate.
 
+## Build status — Phase 14 (Finance — expenses & installments)
+
+Money as a vertical over the one pipeline. A finance entry is an Item
+(`type=expense` for a one-off, `type=installment` for a plan); the amount lives
+in the item's `details` JSON (`FinanceDetails`) while the **due date reuses
+`reminderAt`** — so a finance item is searchable, openable in detail, trashable,
+backed up, and reminded for free (§4: one atom, no duplication). A new
+"هزینه‌ها" page in the home pager shows the total still owed, a list (remaining
+amount, قسط n/total, Jalali due date, pay button) and an add sheet
+(هزینه/قسطی toggle, amount, installment count/period, due presets). Paying an
+installment rolls the due date forward one period (or clears it when settled).
+Amounts are formatted as Toman with Persian digits.
+
 ## Build status — Phase 13 (Habits — first vertical)
 
 Habits are Items (`type=habit`); daily completions live in a `habit_checkins`

@@ -37,13 +37,14 @@ import ir.dbsgraphic.secondbrain.core.designsystem.component.SbIconButton
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbText
 import ir.dbsgraphic.secondbrain.core.designsystem.theme.SecondBrainTheme
 import ir.dbsgraphic.secondbrain.core.designsystem.util.rememberReducedMotion
+import ir.dbsgraphic.secondbrain.feature.finance.FinanceRoute
 import ir.dbsgraphic.secondbrain.feature.habits.HabitsRoute
 import ir.dbsgraphic.secondbrain.feature.inbox.InboxRoute
 import ir.dbsgraphic.secondbrain.feature.project.ProjectsRoute
 import ir.dbsgraphic.secondbrain.feature.timeline.TimelineRoute
 import kotlinx.coroutines.launch
 
-private val sections = listOf("خط زمان", "صندوق", "پروژه‌ها", "عادت‌ها")
+private val sections = listOf("خط زمان", "صندوق", "پروژه‌ها", "عادت‌ها", "هزینه‌ها")
 
 /**
  * The home: a swipeable pager across the three primary sections, with a quiet
@@ -143,7 +144,8 @@ fun MainShell(
                 0 -> TimelineRoute(onOpenItem = onOpenItem)
                 1 -> InboxRoute()
                 2 -> ProjectsRoute(onOpenProject = onOpenProject)
-                else -> HabitsRoute(onOpenItem = onOpenItem)
+                3 -> HabitsRoute(onOpenItem = onOpenItem)
+                else -> FinanceRoute(onOpenItem = onOpenItem)
             }
         }
     }

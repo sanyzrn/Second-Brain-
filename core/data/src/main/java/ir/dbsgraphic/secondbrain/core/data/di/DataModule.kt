@@ -9,6 +9,8 @@ import ir.dbsgraphic.secondbrain.core.data.Clock
 import ir.dbsgraphic.secondbrain.core.data.IdGenerator
 import ir.dbsgraphic.secondbrain.core.data.ItemRepository
 import ir.dbsgraphic.secondbrain.core.data.ItemRepositoryImpl
+import ir.dbsgraphic.secondbrain.core.data.FinanceRepository
+import ir.dbsgraphic.secondbrain.core.data.FinanceRepositoryImpl
 import ir.dbsgraphic.secondbrain.core.data.HabitRepository
 import ir.dbsgraphic.secondbrain.core.data.HabitRepositoryImpl
 import ir.dbsgraphic.secondbrain.core.data.ProjectRepository
@@ -38,6 +40,10 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindHabitRepository(impl: HabitRepositoryImpl): HabitRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindFinanceRepository(impl: FinanceRepositoryImpl): FinanceRepository
 
     companion object {
         @Provides

@@ -51,6 +51,12 @@ internal class FakeItemDao : ItemDao {
             list.filter { it.type == type && it.status != "trashed" }.sortedBy { it.createdAt }
         }
 
+    override fun observeFinance(): Flow<List<Item>> =
+        items.map { list ->
+            list.filter { it.type in setOf("expense", "installment") && it.status != "trashed" }
+                .sortedByDescending { it.createdAt }
+        }
+
     override fun observeInboxCount(): Flow<Int> =
         items.map { list -> list.count { it.status == "inbox" } }
 

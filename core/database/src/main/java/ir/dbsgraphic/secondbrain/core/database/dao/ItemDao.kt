@@ -43,6 +43,10 @@ interface ItemDao {
     @Query("SELECT * FROM items WHERE type = :type AND status != 'trashed' ORDER BY createdAt ASC")
     fun observeByType(type: String): Flow<List<Item>>
 
+    /** Finance items (expenses + installments), newest first. */
+    @Query("SELECT * FROM items WHERE type IN ('expense', 'installment') AND status != 'trashed' ORDER BY createdAt DESC")
+    fun observeFinance(): Flow<List<Item>>
+
     @Query("SELECT COUNT(*) FROM items WHERE status = 'inbox'")
     fun observeInboxCount(): Flow<Int>
 
