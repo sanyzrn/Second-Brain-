@@ -1,0 +1,40 @@
+name: Android Build
+
+# Builds the installable debug APK on GitHub's runners (which have the Android
+# SDK and can reach Google's Maven). Runs on every push to the build branch and
+# can be triggered manually. The APK is published as a downloadable artifact.
+on:
+  push:
+    branches:
+      - claude/secondbrain-android-build-4bnj4l
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build debug APK
+        run: ./gradlew :app:assembleDebug --stacktrace --no-configuration-cache
+
+      - name: Upload APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: second-brain-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
