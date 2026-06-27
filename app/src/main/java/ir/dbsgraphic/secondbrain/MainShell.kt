@@ -37,22 +37,20 @@ import ir.dbsgraphic.secondbrain.core.designsystem.component.SbIconButton
 import ir.dbsgraphic.secondbrain.core.designsystem.component.SbText
 import ir.dbsgraphic.secondbrain.core.designsystem.theme.SecondBrainTheme
 import ir.dbsgraphic.secondbrain.core.designsystem.util.rememberReducedMotion
-import ir.dbsgraphic.secondbrain.feature.finance.FinanceRoute
-import ir.dbsgraphic.secondbrain.feature.habits.HabitsRoute
-import ir.dbsgraphic.secondbrain.feature.goals.GoalsRoute
 import ir.dbsgraphic.secondbrain.feature.inbox.InboxRoute
-import ir.dbsgraphic.secondbrain.feature.medicine.MedicineRoute
 import ir.dbsgraphic.secondbrain.feature.project.ProjectsRoute
 import ir.dbsgraphic.secondbrain.feature.timeline.TimelineRoute
 import kotlinx.coroutines.launch
 
-private val sections = listOf("خط زمان", "صندوق", "پروژه‌ها", "عادت‌ها", "هزینه‌ها", "داروها", "هدف‌ها")
+private val sections = listOf("خط زمان", "صندوق", "پروژه‌ها", "پیگیری‌ها")
 
 /**
- * The home: a swipeable pager across the three primary sections, with a quiet
- * top bar (search + settings) and a segmented switch. Inbox is the start page —
- * everything begins there (§3) — while the Timeline sits to its right (the
- * natural "first" in RTL reading order).
+ * The home: a swipeable pager across the system's spine — Timeline, Inbox,
+ * Projects — plus a Trackers hub that gathers the life-verticals behind one
+ * door (so the primary surface stays calm). A quiet top bar carries search,
+ * reminders, weekly review and settings. Inbox is the start page — everything
+ * begins there (§3) — while the Timeline sits to its right (the natural "first"
+ * in RTL reading order).
  */
 @Composable
 fun MainShell(
@@ -62,6 +60,7 @@ fun MainShell(
     onOpenReminders: () -> Unit,
     onOpenReview: () -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenTracker: (TrackerDest) -> Unit,
 ) {
     val colors = SecondBrainTheme.colors
     val type = SecondBrainTheme.type
@@ -149,10 +148,7 @@ fun MainShell(
                 0 -> TimelineRoute(onOpenItem = onOpenItem)
                 1 -> InboxRoute()
                 2 -> ProjectsRoute(onOpenProject = onOpenProject)
-                3 -> HabitsRoute(onOpenItem = onOpenItem)
-                4 -> FinanceRoute(onOpenItem = onOpenItem)
-                5 -> MedicineRoute(onOpenItem = onOpenItem)
-                else -> GoalsRoute(onOpenItem = onOpenItem)
+                else -> TrackersHub(onOpen = onOpenTracker)
             }
         }
     }

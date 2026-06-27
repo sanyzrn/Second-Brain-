@@ -31,6 +31,14 @@ in **Space Mono** (the "instrument" voice). RTL is the host layout, not a mirror
 - **Offline-first**, no Firebase / no third-party cloud.
 - Custom design system on Compose Foundation; Material used only as a substrate.
 
+## Build status — IA pass (Trackers hub)
+
+The home pager had grown to seven chips. It's now back to a calm four — the
+system's **spine** (`خط زمان · صندوق · پروژه‌ها`) plus a **پیگیری‌ها (Trackers)**
+hub. The hub holds a card per life-vertical (Habits / Finance / Medicine /
+Goals); each opens full-screen with a shared `SbScreenHeader` (title + back).
+Nothing about the verticals themselves changed — only where they're reached.
+
 ## Build status — Phase 17 (Goals & weekly review — the keystone)
 
 The surface that ties the system together (§18 reflection, §19 the long view) —
