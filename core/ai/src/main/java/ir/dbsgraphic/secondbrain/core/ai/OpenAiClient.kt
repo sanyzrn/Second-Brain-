@@ -23,7 +23,7 @@ import java.net.URL
  * dependency. Every call is best-effort: any failure returns null so AI never
  * breaks the app.
  */
-internal class OpenAiClient {
+class OpenAiClient {
 
     private val json = Json { ignoreUnknownKeys = true }
 
